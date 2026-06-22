@@ -12,20 +12,20 @@ export interface QuizQuestion {
 
 // Display order matches the brief exactly.
 export const QUESTIONS: QuizQuestion[] = [
-  { text: 'I trust that life is holding me, and I feel safe in my body.',                            chakraId: 'root',        polarity: '+' },
-  { text: 'When something hurts, my first instinct is to close myself off.',                         chakraId: 'heart',       polarity: '-' },
-  { text: 'When I make decisions, I make them from my center, not from doubt.',                      chakraId: 'solarPlexus', polarity: '+' },
-  { text: 'There are important things I am keeping to myself out of concern for how they would land.',chakraId: 'throat',      polarity: '-' },
-  { text: 'I allow myself to enjoy and to feel pleasure freely.',                                    chakraId: 'sacral',      polarity: '+' },
-  { text: 'I sometimes feel a deep emptiness or disconnection from everything.',                     chakraId: 'crown',       polarity: '-' },
-  { text: 'I trust my intuition even when reasoning tells me otherwise.',                            chakraId: 'thirdEye',    polarity: '+' },
-  { text: 'I carry an underlying anxiety or fear that I have not yet released.',                     chakraId: 'root',        polarity: '-' },
-  { text: 'Something in me feels rigid, or without room to create.',                                 chakraId: 'sacral',      polarity: '-' },
-  { text: 'I can give love and also receive it, including the love I give myself.',                  chakraId: 'heart',       polarity: '+' },
-  { text: 'My life feels meaningful, and I feel part of something greater than me.',                 chakraId: 'crown',       polarity: '+' },
-  { text: 'I postpone or hold myself back even when I know what I need to do.',                      chakraId: 'solarPlexus', polarity: '-' },
-  { text: 'I say what I feel even when it is uncomfortable, without apologizing for it.',            chakraId: 'throat',      polarity: '+' },
-  { text: 'I live in my head, turning everything over without ever quite landing.',                  chakraId: 'thirdEye',    polarity: '-' },
+  { text: 'Right now, I feel safe and steady in my body.',                              chakraId: 'root',        polarity: '+' },
+  { text: 'Something is hurting right now, so I\u2019m keeping myself closed off.',   chakraId: 'heart',       polarity: '-' },
+  { text: 'Today, I feel sure of myself and able to act.',                             chakraId: 'solarPlexus', polarity: '+' },
+  { text: 'Right now, there\u2019s something I\u2019m holding back from saying.',     chakraId: 'throat',      polarity: '-' },
+  { text: 'Today, I feel open to enjoying and feeling pleasure.',                      chakraId: 'sacral',      polarity: '+' },
+  { text: 'Right now, I feel disconnected, like nothing quite matters.',               chakraId: 'crown',       polarity: '-' },
+  { text: 'Today, I trust what my intuition is telling me.',                           chakraId: 'thirdEye',    polarity: '+' },
+  { text: 'Right now, I\u2019m carrying anxiety or unease I can\u2019t shake.',       chakraId: 'root',        polarity: '-' },
+  { text: 'Today, I feel stuck or shut down creatively.',                              chakraId: 'sacral',      polarity: '-' },
+  { text: 'Right now, I feel able to give love and receive it.',                       chakraId: 'heart',       polarity: '+' },
+  { text: 'Today, I feel connected to something larger than myself.',                  chakraId: 'crown',       polarity: '+' },
+  { text: 'Right now, I\u2019m putting things off even though I know what to do.',    chakraId: 'solarPlexus', polarity: '-' },
+  { text: 'Today, I can say what I feel without holding back.',                        chakraId: 'throat',      polarity: '+' },
+  { text: 'Right now, I\u2019m overthinking and can\u2019t quite land on anything.',  chakraId: 'thirdEye',    polarity: '-' },
 ];
 
 // Tie-break: lowest in the body wins first.

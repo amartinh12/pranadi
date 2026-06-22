@@ -12,7 +12,7 @@ import {
 import { chakras } from '../content/chakras';
 import { QUESTIONS, scoreQuiz } from './quizData';
 
-const OPTION_LABELS = ['Not at all', 'Sometimes', 'Often', 'Fully'] as const;
+const OPTION_LABELS = ['Not at all', 'Somewhat', 'Mostly', 'Fully'] as const;
 
 export default function QuizScreen() {
   const router = useRouter();
