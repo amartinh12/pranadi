@@ -98,11 +98,15 @@ export default function CheckInScreen() {
       </View>
 
       {/* ── Continue button ── */}
-      {/* Empty selection is allowed; navigates forward regardless */}
+      {/* Empty selection is allowed; falls back to root chakra as default */}
       <View style={styles.bottomArea}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push('/chakra-of-the-day')}
+          onPress={() =>
+            router.push(
+              `/chakra-of-the-day?chakraId=${selected ?? 'root'}` as never,
+            )
+          }
           activeOpacity={0.82}
         >
           <Text style={styles.buttonText}>Continue</Text>
