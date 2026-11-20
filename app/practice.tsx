@@ -13,7 +13,8 @@ const formatTime = (total: number) =>
 // Its timer lives only in this component's state and starts fresh on each page.
 function StepPage({ step, seconds, accent }: { step: SessionStep; seconds: number; accent: string }) {
   const [remaining, setRemaining] = useState(seconds);
-  const [running, setRunning] = useState(true);
+  const [started, setStarted] = useState(false);
+  const [running, setRunning] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
   const image = poseImages[step.key];
 
@@ -57,7 +58,19 @@ function StepPage({ step, seconds, accent }: { step: SessionStep; seconds: numbe
             ]}
           />
         </View>
-        {!done && (
+        {!started && (
+          <TouchableOpacity
+            style={[styles.startButton, { borderColor: accent }]}
+            onPress={() => {
+              setStarted(true);
+              setRunning(true);
+            }}
+            accessibilityLabel="Start timer"
+          >
+            <Text style={[styles.startText, { color: accent }]}>Start</Text>
+          </TouchableOpacity>
+        )}
+        {started && !done && (
           <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
             <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
           </TouchableOpacity>
@@ -189,6 +202,17 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     color: neutralColors.textSecondary,
     marginTop: spacing.sm,
+  },
+  startButton: {
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xl,
+    borderRadius: 12,
+    borderWidth: 2,
+  },
+  startText: {
+    fontSize: fontSize.body,
+    fontWeight: '600',
   },
   nav: {
     flexDirection: 'row',
