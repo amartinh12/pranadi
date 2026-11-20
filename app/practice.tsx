@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { Alert, Animated, Easing, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { chakraColors, neutralColors, spacing, fontSize } from '../theme/tokens';
 import { chakras, SessionStep } from '../content/chakras';
@@ -9,12 +9,17 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// One page of the practice: image, name, how-to and a countdown timer.
-// Its timer lives only in this component's state and starts fresh on each page.
-function StepPage({ step, seconds, accent }: { step: SessionStep; seconds: number; accent: string }) {
-  const [remaining, setRemaining] = useState(seconds);
+// One page of the practice: the illustration fills the screen behind a soft
+// panel holding the name, how-to, timer and navigation. Its timer lives only in
+// this component's state and starts fresh on each page.
+function StepPage({
+  step, seconds, accent, label, nav, onExit,
+}: { step: SessionStep; seconds: number; accent: string; label: string; nav: ReactNode; onExit: () => void }) {
+  const insets = useSafeAreaInsets();
+  const [panelHeight, setPanelHeight] = useState(0);
   const [started, setStarted] = useState(false);
   const [running, setRunning] = useState(false);
+  const [remaining, setRemaining] = useState(seconds);
   const progress = useRef(new Animated.Value(0)).current;
   const image = poseImages[step.key];
 
@@ -37,16 +42,52 @@ function StepPage({ step, seconds, accent }: { step: SessionStep; seconds: numbe
   const done = remaining <= 0;
 
   return (
-    <View style={styles.page}>
-      <View style={styles.imageBox}>
+    <View style={styles.screen}>
+      {/* Illustration: fills the space above the panel, uncropped */}
+      <View style={[styles.imageBox, { top: insets.top + 28, bottom: Math.max(panelHeight - 24, 0) }]}>
         {image && <Image source={image} style={styles.image} resizeMode="contain" />}
       </View>
 
-      <Text style={styles.stepName}>{step.name.en}</Text>
-      <Text style={styles.description}>{step.description.en}</Text>
+      <Text style={[styles.progressLabel, { top: insets.top + 8 }]}>{label}</Text>
 
-      <View style={styles.timer}>
-        <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
+      {/* Exit: asks first, then returns to the start screen */}
+      <TouchableOpacity
+        style={[styles.exitButton, { top: insets.top }]}
+        onPress={onExit}
+        accessibilityLabel="Exit practice"
+        hitSlop={8}
+      >
+        <Text style={styles.exitText}>✕</Text>
+      </TouchableOpacity>
+
+      {/* Text panel over the bottom of the illustration */}
+      <View
+        style={[styles.panel, { paddingBottom: insets.bottom + spacing.md }]}
+        onLayout={e => setPanelHeight(e.nativeEvent.layout.height)}
+      >
+        <Text style={styles.stepName}>{step.name.en}</Text>
+        <Text style={styles.description}>{step.description.en}</Text>
+
+        <View style={styles.timerRow}>
+          <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
+          {!started && (
+            <TouchableOpacity
+              style={[styles.startButton, { borderColor: accent }]}
+              onPress={() => {
+                setStarted(true);
+                setRunning(true);
+              }}
+              accessibilityLabel="Start timer"
+            >
+              <Text style={[styles.startText, { color: accent }]}>Start</Text>
+            </TouchableOpacity>
+          )}
+          {started && !done && (
+            <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
+              <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <View style={styles.track}>
           <Animated.View
             style={[
@@ -58,23 +99,8 @@ function StepPage({ step, seconds, accent }: { step: SessionStep; seconds: numbe
             ]}
           />
         </View>
-        {!started && (
-          <TouchableOpacity
-            style={[styles.startButton, { borderColor: accent }]}
-            onPress={() => {
-              setStarted(true);
-              setRunning(true);
-            }}
-            accessibilityLabel="Start timer"
-          >
-            <Text style={[styles.startText, { color: accent }]}>Start</Text>
-          </TouchableOpacity>
-        )}
-        {started && !done && (
-          <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
-            <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
-          </TouchableOpacity>
-        )}
+
+        {nav}
       </View>
     </View>
   );
@@ -112,64 +138,93 @@ export default function PracticeScreen() {
   const isFirst = index === 0;
   const isLast = index === steps.length - 1;
 
-  return (
-    <SafeAreaView style={styles.safe}>
-      <Text style={styles.progressLabel}>
-        {session.name.en} · {current.section} · {index + 1} of {steps.length}
-      </Text>
-
-      <StepPage key={current.step.key} step={current.step} seconds={seconds} accent={accent} />
-
-      <View style={styles.nav}>
-        {isFirst ? (
-          <View style={styles.navSpacer} />
-        ) : (
-          <TouchableOpacity style={styles.backButton} onPress={() => setIndex(i => i - 1)}>
-            <Text style={styles.backText}>Back</Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          style={[styles.nextButton, { backgroundColor: accent }]}
-          onPress={() => (isLast ? router.push('/closing-reflection') : setIndex(i => i + 1))}
-        >
-          <Text style={styles.buttonText}>{isLast ? 'Finish' : 'Next'}</Text>
+  const nav = (
+    <View style={styles.nav}>
+      {isFirst ? (
+        <View style={styles.navSpacer} />
+      ) : (
+        <TouchableOpacity style={styles.backButton} onPress={() => setIndex(i => i - 1)}>
+          <Text style={styles.backText}>Back</Text>
         </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+      )}
+      <TouchableOpacity
+        style={[styles.nextButton, { backgroundColor: accent }]}
+        onPress={() => (isLast ? router.push('/closing-reflection') : setIndex(i => i + 1))}
+      >
+        <Text style={styles.buttonText}>{isLast ? 'Finish' : 'Next'}</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  return (
+    <StepPage
+      key={current.step.key}
+      step={current.step}
+      seconds={seconds}
+      accent={accent}
+      label={`${session.name.en} · ${current.section} · ${index + 1} of ${steps.length}`}
+      nav={nav}
+      onExit={() =>
+        Alert.alert('End practice?', 'You will go back to the beginning.', [
+          { text: 'Keep going', style: 'cancel' },
+          { text: 'End practice', style: 'destructive', onPress: () => router.dismissAll() },
+        ])
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  screen: {
     flex: 1,
     backgroundColor: neutralColors.background,
-    paddingHorizontal: spacing.lg,
-  },
-  progressLabel: {
-    fontSize: fontSize.small,
-    color: neutralColors.textSecondary,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  page: {
-    flex: 1,
   },
   imageBox: {
-    flex: 1,
-    minHeight: 140,
+    position: 'absolute',
+    left: 0,
+    right: 0,
   },
   image: {
     flex: 1,
     width: '100%',
   },
+  progressLabel: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    fontSize: fontSize.small,
+    color: neutralColors.textSecondary,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+  },
+  exitButton: {
+    position: 'absolute',
+    left: spacing.md,
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  exitText: {
+    fontSize: fontSize.title,
+    color: neutralColors.textSecondary,
+  },
+  panel: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(247, 245, 242, 0.92)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
   stepName: {
-    fontSize: fontSize.heading,
+    fontSize: fontSize.title,
     color: neutralColors.textPrimary,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: spacing.md,
   },
   description: {
     fontSize: fontSize.body,
@@ -178,17 +233,18 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: spacing.sm,
   },
-  timer: {
+  timerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: spacing.md,
-  },
-  time: {
-    fontSize: 40,
-    fontWeight: '600',
     marginBottom: spacing.sm,
   },
+  time: {
+    fontSize: 36,
+    fontWeight: '600',
+  },
   track: {
-    alignSelf: 'stretch',
     height: 6,
     borderRadius: 3,
     backgroundColor: neutralColors.border,
@@ -201,10 +257,8 @@ const styles = StyleSheet.create({
   pause: {
     fontSize: fontSize.body,
     color: neutralColors.textSecondary,
-    marginTop: spacing.sm,
   },
   startButton: {
-    marginTop: spacing.sm,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xl,
     borderRadius: 12,
@@ -218,7 +272,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    paddingTop: spacing.md,
   },
   navSpacer: {
     width: 80,
