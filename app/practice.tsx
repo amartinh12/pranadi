@@ -9,8 +9,8 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// One page of the practice: header, pose name, the full illustration (never
-// cropped) and a soft panel over its lower part with how-to, timer and navigation. Its timer
+// One page of the practice: the full illustration (never cropped) with the header
+// and pose name over its top, and the how-to, timer and navigation below it. Its timer
 // lives only in this component's state and starts fresh on each page.
 function StepPage({
   step, seconds, accent, label, nav, onExit,
@@ -41,30 +41,30 @@ function StepPage({
   const done = remaining <= 0;
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm }]}>
-      {/* Header: exit on the left, progress centered */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.headerSide}
-          onPress={onExit}
-          accessibilityLabel="Exit practice"
-          hitSlop={8}
-        >
-          <Text style={styles.exitText}>✕</Text>
-        </TouchableOpacity>
-        <Text style={styles.progressLabel}>{label}</Text>
-        <View style={styles.headerSide} />
-      </View>
-
-      <Text style={styles.stepName}>{step.name.en}</Text>
-
-      {/* Illustration: scaled to fit the whole area, never cropped */}
+    <View style={styles.screen}>
+      {/* Illustration area: full image, never cropped, with the header and pose name over its top */}
       <View style={styles.imageBox}>
         {image && <Image source={image} style={styles.image} resizeMode="contain" />}
+
+        <View style={[styles.overlayTop, { paddingTop: insets.top + spacing.sm }]} pointerEvents="box-none">
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.headerSide}
+              onPress={onExit}
+              accessibilityLabel="Exit practice"
+              hitSlop={8}
+            >
+              <Text style={styles.exitText}>✕</Text>
+            </TouchableOpacity>
+            <Text style={styles.progressLabel}>{label}</Text>
+            <View style={styles.headerSide} />
+          </View>
+          <Text style={styles.stepName}>{step.name.en}</Text>
+        </View>
       </View>
 
-      {/* Text panel over the lower part of the illustration */}
-      <View style={[styles.panel, { paddingBottom: insets.bottom + spacing.sm }]}>
+      {/* Below the image, not over it: how-to, timer and navigation */}
+      <View style={[styles.bottom, { paddingBottom: insets.bottom + spacing.sm }]}>
         <Text style={styles.description}>{step.description.en}</Text>
 
         <View style={styles.timerRow}>
@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
     backgroundColor: neutralColors.background,
   },
   header: {
-    paddingHorizontal: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -205,23 +204,27 @@ const styles = StyleSheet.create({
     color: neutralColors.textPrimary,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    marginTop: spacing.xs,
+    alignSelf: 'center',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(247, 245, 242, 0.7)',
   },
   imageBox: {
     flex: 1,
-    minHeight: 120,
-    marginTop: spacing.sm,
+    minHeight: 160,
   },
-  panel: {
+  overlayTop: {
     position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(247, 245, 242, 0.85)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  bottom: {
+    paddingTop: spacing.sm,
     paddingHorizontal: spacing.lg,
   },
   image: {
