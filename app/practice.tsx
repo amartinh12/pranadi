@@ -47,6 +47,11 @@ function StepPage({
 
       <Text style={[styles.progressLabel, { top: insets.top + 8 }]}>{label}</Text>
 
+      {/* Pose name at the top of the screen */}
+      <View style={[styles.titleWrap, { top: insets.top + 36 }]} pointerEvents="none">
+        <Text style={styles.stepName}>{step.name.en}</Text>
+      </View>
+
       {/* Exit: asks first, then returns to the start screen */}
       <TouchableOpacity
         style={[styles.exitButton, { top: insets.top }]}
@@ -59,7 +64,6 @@ function StepPage({
 
       {/* Text panel over the bottom of the illustration */}
       <View style={[styles.panel, { paddingBottom: insets.bottom + spacing.md }]}>
-        <Text style={styles.stepName}>{step.name.en}</Text>
         <Text style={styles.description}>{step.description.en}</Text>
 
         <View style={styles.timerRow}>
@@ -212,18 +216,28 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.lg,
   },
+  titleWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
   stepName: {
-    fontSize: fontSize.title,
+    fontSize: fontSize.heading,
     color: neutralColors.textPrimary,
     fontWeight: '600',
     textAlign: 'center',
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(247, 245, 242, 0.7)',
   },
   description: {
     fontSize: fontSize.body,
-    color: neutralColors.textSecondary,
+    color: neutralColors.textPrimary,
     textAlign: 'center',
     lineHeight: 22,
-    marginTop: spacing.sm,
   },
   timerRow: {
     flexDirection: 'row',
