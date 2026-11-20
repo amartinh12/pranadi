@@ -1,7 +1,18 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { neutralColors, spacing, fontSize } from '../theme/tokens';
-import { chakras } from '../content/chakras';
+import { chakras, SessionStep } from '../content/chakras';
+import { poseImages } from '../content/poseImages';
+
+function StepRow({ step, number }: { step: SessionStep; number: number }) {
+  const image = poseImages[step.key];
+  return (
+    <View style={styles.row}>
+      {image && <Image source={image} style={styles.thumb} resizeMode="cover" />}
+      <Text style={styles.item}>{number}. {step.name.en}</Text>
+    </View>
+  );
+}
 
 export default function PracticeScreen() {
   const router = useRouter();
@@ -20,12 +31,12 @@ export default function PracticeScreen() {
         <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
           {session.warmups.length > 0 && <Text style={styles.sectionLabel}>Warm-up</Text>}
           {session.warmups.map((w, i) => (
-            <Text key={w.key} style={styles.item}>{i + 1}. {w.name.en}</Text>
+            <StepRow key={w.key} step={w} number={i + 1} />
           ))}
 
           <Text style={styles.sectionLabel}>Poses</Text>
           {session.poses.map((p, i) => (
-            <Text key={p.key} style={styles.item}>{i + 1}. {p.name.en}</Text>
+            <StepRow key={p.key} step={p} number={i + 1} />
           ))}
         </ScrollView>
       )}
@@ -63,10 +74,22 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.xs,
+  },
+  thumb: {
+    width: 56,
+    height: 84,
+    borderRadius: 8,
+    marginRight: spacing.md,
+    backgroundColor: neutralColors.border,
+  },
   item: {
+    flex: 1,
     fontSize: fontSize.body,
     color: neutralColors.textPrimary,
-    paddingVertical: spacing.xs,
   },
   button: {
     backgroundColor: neutralColors.textPrimary,
