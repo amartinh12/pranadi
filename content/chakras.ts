@@ -13,6 +13,25 @@ export type PranaEnergy = {
   high:     LocalizedString;
 };
 
+// ─── Practice Session Types ──────────────────────────────────────────────────
+// Text only — no images are bundled, to keep the app small. `key` matches the
+// illustration file name in Drive (e.g. "root_pose1") so images can be added later.
+
+export type SessionStep = {
+  key:  string;
+  name: LocalizedString;
+};
+
+export type SessionLevel = 'pause' | 'flow' | 'journey';
+
+export interface PracticeSession {
+  level:   SessionLevel;
+  name:    LocalizedString;
+  minutes: number;
+  warmups: SessionStep[];   // may be empty (Pause has no warm-up)
+  poses:   SessionStep[];   // in the numbered order of the source files
+}
+
 // ─── Chakra Type ─────────────────────────────────────────────────────────────
 
 export interface Chakra {
@@ -38,7 +57,108 @@ export interface Chakra {
   foods:          LocalizedList;
   blockedSummary:  LocalizedString;
   balancedSummary: LocalizedString;
+  sessions?:       PracticeSession[];            // Pause / Flow / Journey; filled per chakra as ready
 }
+
+// ─── Session Data (Root & Sacral) ────────────────────────────────────────────
+// Source: Drive "PraNadi" folder → "Naming and pose" docs. Numbers match the
+// illustration file names, and sessions always run in numbered order.
+
+const step = (key: string, en: string): SessionStep => ({ key, name: { en, es: '' } });
+const pick = (list: SessionStep[], numbers: number[]): SessionStep[] => numbers.map((n) => list[n - 1]);
+
+const rootWarmups: SessionStep[] = [
+  step('root_warmup1', 'Ankle rolls'),
+  step('root_warmup2', 'Toe spreading'),
+  step('root_warmup3', 'Calf rocks'),
+  step('root_warmup4', 'Standing forward fold sway'),
+  step('root_warmup5', 'Hip circles standing'),
+  step('root_warmup6', 'Cat-cow on hands and knees'),
+  step('root_warmup7', 'Knee-to-chest hugs'),
+  step('root_warmup8', 'Hip flexor opener kneeling'),
+];
+
+const rootPoses: SessionStep[] = [
+  step('root_pose1',  'Mountain pose'),
+  step('root_pose2',  'Mountain with arms up'),
+  step('root_pose3',  'Tree pose'),
+  step('root_pose4',  'Warrior I'),
+  step('root_pose5',  'Warrior II'),
+  step('root_pose6',  'Goddess pose'),
+  step('root_pose7',  'Chair pose'),
+  step('root_pose8',  'Big toe pose'),
+  step('root_pose9',  'Easy seat'),
+  step('root_pose10', 'Bound angle'),
+  step('root_pose11', 'Staff pose'),
+  step('root_pose12', 'Garland pose'),
+  step('root_pose13', 'Low lunge'),
+  step('root_pose14', 'Child\'s pose'),
+  step('root_pose15', 'Cat-Cow'),
+  step('root_pose16', 'Half lord of the fishes'),
+  step('root_pose17', 'Cobra'),
+  step('root_pose18', 'Bridge'),
+  step('root_pose19', 'Knees-to-chest'),
+  step('root_pose20', 'Legs up the wall'),
+  step('root_pose21', 'Savasana'),
+];
+
+const sacralWarmups: SessionStep[] = [
+  step('sacral_warmup1', 'Pelvic tilts on the floor'),
+  step('sacral_warmup2', 'Hip circles on hands and knees'),
+  step('sacral_warmup3', 'Windshield wiper legs'),
+  step('sacral_warmup4', 'Standing side bends'),
+  step('sacral_warmup5', 'Cat-cow with hip sway'),
+  step('sacral_warmup6', 'Standing hip openers'),
+  // The naming doc lists "Standing hip openers" twice (6 and 7); the pose list
+  // has "Belly breathing" as the 7th warm-up, so that name is used here.
+  step('sacral_warmup7', 'Belly breathing'),
+  step('sacral_warmup8', 'Knees-to-chest with sway'),
+];
+
+const sacralPoses: SessionStep[] = [
+  step('sacral_pose1',  'Mountain pose'),
+  step('sacral_pose2',  'Standing forward fold'),
+  step('sacral_pose3',  'Wide-legged forward fold'),
+  step('sacral_pose4',  'Goddess pose'),
+  step('sacral_pose5',  'Warrior II'),
+  step('sacral_pose6',  'Triangle pose'),
+  step('sacral_pose7',  'Downward-facing dog'),
+  step('sacral_pose8',  'Low lunge'),
+  step('sacral_pose9',  'Lizard pose'),
+  step('sacral_pose10', 'Pigeon pose'),
+  step('sacral_pose11', 'Bound angle'),
+  step('sacral_pose12', 'Reclined bound angle'),
+  step('sacral_pose13', 'Happy baby'),
+  step('sacral_pose14', 'Cat-Cow with hip movement'),
+  step('sacral_pose15', 'Supine spinal twist'),
+  step('sacral_pose16', 'Bridge with pelvic flow'),
+  step('sacral_pose17', 'Knees-to-chest with sway'),
+  step('sacral_pose18', 'Savasana'),
+];
+
+const sessionNames = {
+  pause:   { en: 'Pause',   es: '' },
+  flow:    { en: 'Flow',    es: '' },
+  journey: { en: 'Journey', es: '' },
+};
+
+const rootSessions: PracticeSession[] = [
+  { level: 'pause',   name: sessionNames.pause,   minutes: 5,  warmups: [],
+    poses: pick(rootPoses, [9, 14, 19, 20, 21]) },
+  { level: 'flow',    name: sessionNames.flow,    minutes: 20, warmups: pick(rootWarmups, [1, 5, 6]),
+    poses: pick(rootPoses, [1, 3, 4, 5, 6, 13, 14, 21]) },
+  { level: 'journey', name: sessionNames.journey, minutes: 45, warmups: rootWarmups,
+    poses: rootPoses },
+];
+
+const sacralSessions: PracticeSession[] = [
+  { level: 'pause',   name: sessionNames.pause,   minutes: 5,  warmups: [],
+    poses: pick(sacralPoses, [11, 12, 13, 17, 18]) },
+  { level: 'flow',    name: sessionNames.flow,    minutes: 20, warmups: pick(sacralWarmups, [1, 2, 5]),
+    poses: pick(sacralPoses, [1, 3, 4, 5, 8, 10, 13, 15, 18]) },
+  { level: 'journey', name: sessionNames.journey, minutes: 45, warmups: sacralWarmups,
+    poses: sacralPoses },
+];
 
 // ─── Chakra Data ─────────────────────────────────────────────────────────────
 // Source: "Journey Through the Chakras — Energetic Guide for Inner Balance"
@@ -100,6 +220,7 @@ export const chakras: Chakra[] = [
     },
     blockedSummary:  { en: 'Fears, anxiety, insecurity, financial problems, disconnection from the body, fatigue', es: '' },
     balancedSummary: { en: 'Sense of stability, basic trust, connection with the body, vital energy, grounding', es: '' },
+    sessions: rootSessions,
   },
 
   // ── 2. Sacral ──────────────────────────────────────────────────────────────
@@ -154,6 +275,7 @@ export const chakras: Chakra[] = [
     },
     blockedSummary:  { en: 'Guilt, sexual repression, creative blocks, emotional dependency, addictions', es: '' },
     balancedSummary: { en: 'Emotional fluidity, active creativity, body enjoyment, healthy relationships', es: '' },
+    sessions: sacralSessions,
   },
 
   // ── 3. Solar Plexus ────────────────────────────────────────────────────────
