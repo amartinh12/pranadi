@@ -1,15 +1,37 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { neutralColors, spacing, fontSize } from '../theme/tokens';
+import { chakras } from '../content/chakras';
 
 export default function IntensityScreen() {
   const router = useRouter();
+  const { chakraId } = useLocalSearchParams<{ chakraId?: string }>();
+  const sessions = chakras.find(c => c.id === chakraId)?.sessions;
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Intensity</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/practice')}>
-        <Text style={styles.buttonText}>Start practice</Text>
-      </TouchableOpacity>
+
+      {sessions ? (
+        sessions.map(session => (
+          <TouchableOpacity
+            key={session.level}
+            style={styles.button}
+            onPress={() =>
+              router.push({ pathname: '/practice', params: { chakraId, level: session.level } })
+            }
+          >
+            <Text style={styles.buttonText}>
+              {session.name.en} · {session.minutes} min
+            </Text>
+          </TouchableOpacity>
+        ))
+      ) : (
+        // Chakras without sessions yet keep the original single button
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/practice')}>
+          <Text style={styles.buttonText}>Start practice</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -33,6 +55,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
     borderRadius: 12,
+    marginBottom: spacing.md,
   },
   buttonText: {
     color: neutralColors.surface,

@@ -60,7 +60,7 @@ export default function ChakraOfTheDayScreen() {
         {/* ── Continue ── */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: accent, shadowColor: accent }]}
-          onPress={() => router.push('/intensity')}
+          onPress={() => router.push({ pathname: '/intensity', params: { chakraId: chakra.id } })}
           activeOpacity={0.82}
         >
           <Text style={styles.buttonText}>Continue</Text>
