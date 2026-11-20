@@ -1,4 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '../components/Text';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { neutralColors, spacing, fontSize } from '../theme/tokens';
 import { chakras } from '../content/chakras';
@@ -54,7 +55,7 @@ const styles = StyleSheet.create({
     backgroundColor: neutralColors.textPrimary,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: spacing.md,
   },
   buttonText: {

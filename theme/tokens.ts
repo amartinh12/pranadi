@@ -12,11 +12,22 @@ export const chakraColors = {
 
 // ─── Neutral Colors ───────────────────────────────────────────────────────────
 export const neutralColors = {
-  background:    '#F7F5F2', // warm off-white page background
+  background:    '#F6F4F9', // soft lavender-tinted white page background
   surface:       '#FFFFFF', // card / sheet surface
-  textPrimary:   '#1A1A2E', // near-black for body copy
-  textSecondary: '#6B6B7B', // muted grey for captions / labels
-  border:        '#E0DDD8', // subtle divider / stroke
+  textPrimary:   '#2D2B6B', // deep indigo — PraNadi brand, body copy and buttons
+  textSecondary: '#6E6C8F', // muted indigo-grey for captions / labels
+  border:        '#E4E1EE', // subtle divider / stroke
+} as const;
+
+// ─── Fonts ────────────────────────────────────────────────────────────────────
+// Loaded once in app/_layout.tsx. Use the <Text> in components/Text.tsx, which
+// picks from these automatically.
+export const fonts = {
+  body:       'DMSans_400Regular',
+  bodyMedium: 'DMSans_500Medium',
+  bodyBold:   'DMSans_600SemiBold',
+  italic:     'DMSans_400Regular_Italic',
+  heading:    'PlayfairDisplay_700Bold',
 } as const;
 
 // ─── Spacing Scale ────────────────────────────────────────────────────────────

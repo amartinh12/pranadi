@@ -1,17 +1,13 @@
-import { ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '../components/Text';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useFonts, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
 import { neutralColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
 
 const bgImage = require('../assets/welcome-background.jpg');
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold });
-
-  if (!fontsLoaded) return null;
-
   return (
     <ImageBackground source={bgImage} style={styles.bg} resizeMode="cover">
       <SafeAreaView style={styles.safe}>

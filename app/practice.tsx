@@ -1,8 +1,9 @@
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import { Alert, Animated, Easing, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Animated, Easing, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Text } from '../components/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { chakraColors, neutralColors, spacing, fontSize } from '../theme/tokens';
+import { chakraColors, neutralColors, spacing, fontSize, fonts } from '../theme/tokens';
 import { chakras, SessionStep } from '../content/chakras';
 import { poseImages } from '../content/poseImages';
 
@@ -227,6 +228,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   time: {
+    fontFamily: fonts.bodyBold,
     fontSize: 36,
     fontWeight: '600',
   },
@@ -247,7 +249,7 @@ const styles = StyleSheet.create({
   startButton: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.xl,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 2,
   },
   startText: {
@@ -275,7 +277,7 @@ const styles = StyleSheet.create({
   nextButton: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   placeholder: {
     flex: 1,
@@ -294,7 +296,7 @@ const styles = StyleSheet.create({
     backgroundColor: neutralColors.textPrimary,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   buttonText: {
     color: neutralColors.surface,
