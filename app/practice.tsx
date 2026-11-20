@@ -16,7 +16,6 @@ function StepPage({
   step, seconds, accent, label, nav, onExit,
 }: { step: SessionStep; seconds: number; accent: string; label: string; nav: ReactNode; onExit: () => void }) {
   const insets = useSafeAreaInsets();
-  const [panelHeight, setPanelHeight] = useState(0);
   const [started, setStarted] = useState(false);
   const [running, setRunning] = useState(false);
   const [remaining, setRemaining] = useState(seconds);
@@ -43,10 +42,8 @@ function StepPage({
 
   return (
     <View style={styles.screen}>
-      {/* Illustration: fills the space above the panel, uncropped */}
-      <View style={[styles.imageBox, { top: insets.top + 28, bottom: Math.max(panelHeight - 24, 0) }]}>
-        {image && <Image source={image} style={styles.image} resizeMode="contain" />}
-      </View>
+      {/* Illustration: fills the whole screen (edges may be cropped to fit) */}
+      {image && <Image source={image} style={styles.image} resizeMode="cover" />}
 
       <Text style={[styles.progressLabel, { top: insets.top + 8 }]}>{label}</Text>
 
@@ -61,10 +58,7 @@ function StepPage({
       </TouchableOpacity>
 
       {/* Text panel over the bottom of the illustration */}
-      <View
-        style={[styles.panel, { paddingBottom: insets.bottom + spacing.md }]}
-        onLayout={e => setPanelHeight(e.nativeEvent.layout.height)}
-      >
+      <View style={[styles.panel, { paddingBottom: insets.bottom + spacing.md }]}>
         <Text style={styles.stepName}>{step.name.en}</Text>
         <Text style={styles.description}>{step.description.en}</Text>
 
@@ -179,14 +173,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: neutralColors.background,
   },
-  imageBox: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-  },
   image: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
+    height: '100%',
   },
   progressLabel: {
     position: 'absolute',
@@ -214,7 +204,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(247, 245, 242, 0.92)',
+    backgroundColor: 'rgba(247, 245, 242, 0.88)',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: spacing.lg,
