@@ -9,9 +9,9 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// One page of the practice: the illustration fills the screen behind a soft
-// panel holding the name, how-to, timer and navigation. Its timer lives only in
-// this component's state and starts fresh on each page.
+// One page of the practice, stacked top to bottom with nothing overlapping:
+// header, pose name, full illustration, how-to, timer and navigation. Its timer
+// lives only in this component's state and starts fresh on each page.
 function StepPage({
   step, seconds, accent, label, nav, onExit,
 }: { step: SessionStep; seconds: number; accent: string; label: string; nav: ReactNode; onExit: () => void }) {
@@ -41,65 +41,63 @@ function StepPage({
   const done = remaining <= 0;
 
   return (
-    <View style={styles.screen}>
-      {/* Illustration: fills the whole screen (edges may be cropped to fit) */}
-      {image && <Image source={image} style={styles.image} resizeMode="cover" />}
-
-      <Text style={[styles.progressLabel, { top: insets.top + 8 }]}>{label}</Text>
-
-      {/* Pose name at the top of the screen */}
-      <View style={[styles.titleWrap, { top: insets.top + 36 }]} pointerEvents="none">
-        <Text style={styles.stepName}>{step.name.en}</Text>
+    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + spacing.sm }]}>
+      {/* Header: exit on the left, progress centered */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.headerSide}
+          onPress={onExit}
+          accessibilityLabel="Exit practice"
+          hitSlop={8}
+        >
+          <Text style={styles.exitText}>✕</Text>
+        </TouchableOpacity>
+        <Text style={styles.progressLabel}>{label}</Text>
+        <View style={styles.headerSide} />
       </View>
 
-      {/* Exit: asks first, then returns to the start screen */}
-      <TouchableOpacity
-        style={[styles.exitButton, { top: insets.top }]}
-        onPress={onExit}
-        accessibilityLabel="Exit practice"
-        hitSlop={8}
-      >
-        <Text style={styles.exitText}>✕</Text>
-      </TouchableOpacity>
+      <Text style={styles.stepName}>{step.name.en}</Text>
 
-      {/* Text panel over the bottom of the illustration */}
-      <View style={[styles.panel, { paddingBottom: insets.bottom + spacing.md }]}>
-        <Text style={styles.description}>{step.description.en}</Text>
-
-        <View style={styles.timerRow}>
-          <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
-          {!started && (
-            <TouchableOpacity
-              style={[styles.startButton, { borderColor: accent }]}
-              onPress={() => {
-                setStarted(true);
-                setRunning(true);
-              }}
-              accessibilityLabel="Start timer"
-            >
-              <Text style={[styles.startText, { color: accent }]}>Start</Text>
-            </TouchableOpacity>
-          )}
-          {started && !done && (
-            <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
-              <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <View style={styles.track}>
-          <Animated.View
-            style={[
-              styles.fill,
-              {
-                backgroundColor: accent,
-                width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-              },
-            ]}
-          />
-        </View>
-
-        {nav}
+      {/* Illustration: scaled to fit the space available, never cropped */}
+      <View style={styles.imageBox}>
+        {image && <Image source={image} style={styles.image} resizeMode="contain" />}
       </View>
+
+      <Text style={styles.description}>{step.description.en}</Text>
+
+      <View style={styles.timerRow}>
+        <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
+        {!started && (
+          <TouchableOpacity
+            style={[styles.startButton, { borderColor: accent }]}
+            onPress={() => {
+              setStarted(true);
+              setRunning(true);
+            }}
+            accessibilityLabel="Start timer"
+          >
+            <Text style={[styles.startText, { color: accent }]}>Start</Text>
+          </TouchableOpacity>
+        )}
+        {started && !done && (
+          <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
+            <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={styles.track}>
+        <Animated.View
+          style={[
+            styles.fill,
+            {
+              backgroundColor: accent,
+              width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+            },
+          ]}
+        />
+      </View>
+
+      {nav}
     </View>
   );
 }
@@ -176,62 +174,44 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: neutralColors.background,
+    paddingHorizontal: spacing.lg,
   },
-  image: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  progressLabel: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    fontSize: fontSize.small,
-    color: neutralColors.textSecondary,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-  },
-  exitButton: {
-    position: 'absolute',
-    left: spacing.md,
+  headerSide: {
     width: 40,
     height: 40,
-    alignItems: 'center',
     justifyContent: 'center',
   },
   exitText: {
     fontSize: fontSize.title,
     color: neutralColors.textSecondary,
   },
-  panel: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(247, 245, 242, 0.88)',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.lg,
-  },
-  titleWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+  progressLabel: {
+    flex: 1,
+    fontSize: fontSize.small,
+    color: neutralColors.textSecondary,
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
   stepName: {
     fontSize: fontSize.heading,
     color: neutralColors.textPrimary,
     fontWeight: '600',
     textAlign: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(247, 245, 242, 0.7)',
+    marginTop: spacing.sm,
+  },
+  imageBox: {
+    flex: 1,
+    minHeight: 120,
+    marginVertical: spacing.sm,
+  },
+  image: {
+    flex: 1,
+    width: '100%',
   },
   description: {
     fontSize: fontSize.body,
