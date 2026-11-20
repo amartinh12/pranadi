@@ -9,8 +9,8 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// One page of the practice, stacked top to bottom with nothing overlapping:
-// header, pose name, full illustration, how-to, timer and navigation. Its timer
+// One page of the practice: header, pose name, the full illustration (never
+// cropped) and a soft panel over its lower part with how-to, timer and navigation. Its timer
 // lives only in this component's state and starts fresh on each page.
 function StepPage({
   step, seconds, accent, label, nav, onExit,
@@ -41,7 +41,7 @@ function StepPage({
   const done = remaining <= 0;
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + spacing.sm }]}>
+    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm }]}>
       {/* Header: exit on the left, progress centered */}
       <View style={styles.header}>
         <TouchableOpacity
@@ -58,46 +58,49 @@ function StepPage({
 
       <Text style={styles.stepName}>{step.name.en}</Text>
 
-      {/* Illustration: scaled to fit the space available, never cropped */}
+      {/* Illustration: scaled to fit the whole area, never cropped */}
       <View style={styles.imageBox}>
         {image && <Image source={image} style={styles.image} resizeMode="contain" />}
       </View>
 
-      <Text style={styles.description}>{step.description.en}</Text>
+      {/* Text panel over the lower part of the illustration */}
+      <View style={[styles.panel, { paddingBottom: insets.bottom + spacing.sm }]}>
+        <Text style={styles.description}>{step.description.en}</Text>
 
-      <View style={styles.timerRow}>
-        <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
-        {!started && (
-          <TouchableOpacity
-            style={[styles.startButton, { borderColor: accent }]}
-            onPress={() => {
-              setStarted(true);
-              setRunning(true);
-            }}
-            accessibilityLabel="Start timer"
-          >
-            <Text style={[styles.startText, { color: accent }]}>Start</Text>
-          </TouchableOpacity>
-        )}
-        {started && !done && (
-          <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
-            <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      <View style={styles.track}>
-        <Animated.View
-          style={[
-            styles.fill,
-            {
-              backgroundColor: accent,
-              width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-            },
-          ]}
-        />
-      </View>
+        <View style={styles.timerRow}>
+          <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
+          {!started && (
+            <TouchableOpacity
+              style={[styles.startButton, { borderColor: accent }]}
+              onPress={() => {
+                setStarted(true);
+                setRunning(true);
+              }}
+              accessibilityLabel="Start timer"
+            >
+              <Text style={[styles.startText, { color: accent }]}>Start</Text>
+            </TouchableOpacity>
+          )}
+          {started && !done && (
+            <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
+              <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.track}>
+          <Animated.View
+            style={[
+              styles.fill,
+              {
+                backgroundColor: accent,
+                width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+              },
+            ]}
+          />
+        </View>
 
-      {nav}
+        {nav}
+      </View>
     </View>
   );
 }
@@ -174,9 +177,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: neutralColors.background,
-    paddingHorizontal: spacing.lg,
   },
   header: {
+    paddingHorizontal: spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -203,11 +206,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
     marginTop: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   imageBox: {
     flex: 1,
     minHeight: 120,
-    marginVertical: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  panel: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(247, 245, 242, 0.85)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.lg,
   },
   image: {
     flex: 1,
