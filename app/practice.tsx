@@ -9,8 +9,8 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// One page of the practice: the full illustration (never cropped) with the header
-// and pose name over its top, and the how-to, timer and navigation below it. Its timer
+// One page of the practice, stacked top to bottom with nothing overlapping:
+// header, pose name, full illustration, how-to, timer and navigation. Its timer
 // lives only in this component's state and starts fresh on each page.
 function StepPage({
   step, seconds, accent, label, nav, onExit,
@@ -41,66 +41,63 @@ function StepPage({
   const done = remaining <= 0;
 
   return (
-    <View style={styles.screen}>
-      {/* Illustration area: full image, never cropped, with the header and pose name over its top */}
+    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + spacing.sm }]}>
+      {/* Header: exit on the left, progress centered */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.headerSide}
+          onPress={onExit}
+          accessibilityLabel="Exit practice"
+          hitSlop={8}
+        >
+          <Text style={styles.exitText}>✕</Text>
+        </TouchableOpacity>
+        <Text style={styles.progressLabel}>{label}</Text>
+        <View style={styles.headerSide} />
+      </View>
+
+      <Text style={styles.stepName}>{step.name.en}</Text>
+
+      {/* Illustration: scaled to fit the space available, never cropped */}
       <View style={styles.imageBox}>
         {image && <Image source={image} style={styles.image} resizeMode="contain" />}
-
-        <View style={[styles.overlayTop, { paddingTop: insets.top + spacing.sm }]} pointerEvents="box-none">
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.headerSide}
-              onPress={onExit}
-              accessibilityLabel="Exit practice"
-              hitSlop={8}
-            >
-              <Text style={styles.exitText}>✕</Text>
-            </TouchableOpacity>
-            <Text style={styles.progressLabel}>{label}</Text>
-            <View style={styles.headerSide} />
-          </View>
-          <Text style={styles.stepName}>{step.name.en}</Text>
-        </View>
       </View>
 
-      {/* Below the image, not over it: how-to, timer and navigation */}
-      <View style={[styles.bottom, { paddingBottom: insets.bottom + spacing.sm }]}>
-        <Text style={styles.description}>{step.description.en}</Text>
+      <Text style={styles.description}>{step.description.en}</Text>
 
-        <View style={styles.timerRow}>
-          <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
-          {!started && (
-            <TouchableOpacity
-              style={[styles.startButton, { borderColor: accent }]}
-              onPress={() => {
-                setStarted(true);
-                setRunning(true);
-              }}
-              accessibilityLabel="Start timer"
-            >
-              <Text style={[styles.startText, { color: accent }]}>Start</Text>
-            </TouchableOpacity>
-          )}
-          {started && !done && (
-            <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
-              <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <View style={styles.track}>
-          <Animated.View
-            style={[
-              styles.fill,
-              {
-                backgroundColor: accent,
-                width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-              },
-            ]}
-          />
-        </View>
-
-        {nav}
+      <View style={styles.timerRow}>
+        <Text style={[styles.time, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
+        {!started && (
+          <TouchableOpacity
+            style={[styles.startButton, { borderColor: accent }]}
+            onPress={() => {
+              setStarted(true);
+              setRunning(true);
+            }}
+            accessibilityLabel="Start timer"
+          >
+            <Text style={[styles.startText, { color: accent }]}>Start</Text>
+          </TouchableOpacity>
+        )}
+        {started && !done && (
+          <TouchableOpacity onPress={() => setRunning(r => !r)} accessibilityLabel={running ? 'Pause timer' : 'Resume timer'}>
+            <Text style={styles.pause}>{running ? 'Pause' : 'Resume'}</Text>
+          </TouchableOpacity>
+        )}
       </View>
+      <View style={styles.track}>
+        <Animated.View
+          style={[
+            styles.fill,
+            {
+              backgroundColor: accent,
+              width: progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
+            },
+          ]}
+        />
+      </View>
+
+      {nav}
     </View>
   );
 }
@@ -177,6 +174,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: neutralColors.background,
+    paddingHorizontal: spacing.lg,
   },
   header: {
     flexDirection: 'row',
@@ -204,28 +202,12 @@ const styles = StyleSheet.create({
     color: neutralColors.textPrimary,
     fontWeight: '600',
     textAlign: 'center',
-    marginTop: spacing.xs,
-    alignSelf: 'center',
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: 14,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(247, 245, 242, 0.7)',
+    marginTop: spacing.sm,
   },
   imageBox: {
     flex: 1,
-    minHeight: 160,
-  },
-  overlayTop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: spacing.lg,
-  },
-  bottom: {
-    paddingTop: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    minHeight: 120,
+    marginVertical: spacing.sm,
   },
   image: {
     flex: 1,
