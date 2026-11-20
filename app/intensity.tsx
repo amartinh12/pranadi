@@ -11,7 +11,7 @@ export default function IntensityScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Intensity</Text>
+      <Text style={styles.heading}>Choose your rhythm</Text>
 
       {sessions ? (
         sessions.map(session => (
