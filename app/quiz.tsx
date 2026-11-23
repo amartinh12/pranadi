@@ -10,6 +10,7 @@ import {
   welcomeColors,
   spacing,
   fontSize,
+  fonts,
 } from '../theme/tokens';
 import { chakras } from '../content/chakras';
 import { QUESTIONS, scoreQuiz } from './quizData';
@@ -50,7 +51,7 @@ export default function QuizScreen() {
 
           {/* Navigate and pass the chakra id forward so a future step can use it */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: accent, shadowColor: accent }]}
+            style={styles.button}
             onPress={() =>
               router.push(`/chakra-of-the-day?chakraId=${chakraId}` as never)
             }
@@ -107,9 +108,12 @@ export default function QuizScreen() {
             <View style={styles.backButton} />
           )}
 
-          <Text style={styles.progressLabel}>
-            {currentIndex + 1} of {QUESTIONS.length}
-          </Text>
+          <View style={styles.progressCentre}>
+            <Text style={styles.progressTitle}>Check in with yourself</Text>
+            <Text style={styles.progressLabel}>
+              {currentIndex + 1} of {QUESTIONS.length}
+            </Text>
+          </View>
 
           {/* Balancing spacer — same width as back button */}
           <View style={styles.backButton} />
@@ -191,22 +195,31 @@ const styles = StyleSheet.create({
     fontSize: fontSize.title,
     color: neutralColors.textSecondary,
   },
+  progressCentre: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  progressTitle: {
+    fontSize: 11,
+    color: neutralColors.textSecondary,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
   progressLabel: {
     fontSize: fontSize.small,
     color: neutralColors.textSecondary,
     letterSpacing: 0.5,
+    marginTop: 2,
   },
   progressTrack: {
-    height: 3,
+    height: 2,
     backgroundColor: neutralColors.border,
-    borderRadius: 2,
     marginBottom: spacing.xl,
     overflow: 'hidden',
   },
   progressFill: {
-    height: 3,
-    backgroundColor: welcomeColors.deepIndigo,
-    borderRadius: 2,
+    height: 2,
+    backgroundColor: neutralColors.textPrimary,
   },
 
   // ── Question ──────────────────────────────────────────────────────────────
@@ -215,10 +228,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   questionText: {
-    fontSize: fontSize.title,
-    fontWeight: '500',
+    fontFamily: fonts.heading,
+    fontSize: 24,
     color: neutralColors.textPrimary,
-    lineHeight: 32,
+    lineHeight: 34,
     textAlign: 'center',
   },
 
@@ -229,15 +242,15 @@ const styles = StyleSheet.create({
   option: {
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    borderRadius: 14,
-    borderWidth: 1.5,
+    borderRadius: 16,
+    borderWidth: 1,
     borderColor: neutralColors.border,
     backgroundColor: neutralColors.surface,
     alignItems: 'center',
   },
   optionSelected: {
-    borderColor: welcomeColors.deepIndigo,
-    backgroundColor: '#EEEDF8',
+    borderColor: neutralColors.textPrimary,
+    backgroundColor: '#F5F0E9',
   },
   optionText: {
     fontSize: fontSize.body,
@@ -245,7 +258,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   optionTextSelected: {
-    color: welcomeColors.deepIndigo,
+    color: neutralColors.textPrimary,
     fontWeight: '600',
   },
 
@@ -266,9 +279,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     shadowColor: welcomeColors.deepIndigo,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 14,
-    elevation: 7,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
     marginBottom: spacing.md,
   },
   buttonDisabled: {

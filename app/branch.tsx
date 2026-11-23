@@ -28,13 +28,13 @@ export default function BranchScreen() {
             <Text style={styles.cardSubtitle}>Pick the area yourself</Text>
           </TouchableOpacity>
 
-          {/* Card 2 — Help me find it */}
+          {/* Card 2 — Check in with yourself (the questions) */}
           <TouchableOpacity
             style={styles.card}
             onPress={() => router.push('/quiz')}
             activeOpacity={0.78}
           >
-            <Text style={styles.cardLabel}>Help me{'\n'}find it</Text>
+            <Text style={styles.cardLabel}>Check in with{'\n'}yourself</Text>
             <Text style={styles.cardSubtitle}>Answer a few questions</Text>
           </TouchableOpacity>
 
