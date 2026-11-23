@@ -9,6 +9,8 @@ import { chakraDeep, fonts, neutralColors, poseColors, spacing, fontSize } from 
 import { Chakra, chakras, SessionStep } from '../content/chakras';
 import { poseImages } from '../content/poseImages';
 
+const rootSymbol = require('../assets/root-symbol.png');
+
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
@@ -90,9 +92,19 @@ function StepPage({
       <View style={styles.cardWrap}>
         <View style={[styles.card, compact && styles.cardCompact]}>
           {/* Chakra header */}
-          <View style={[styles.symbol, compact && styles.symbolCompact, { backgroundColor: accent }]}>
-            <Text style={styles.symbolText}>{chakra.mantra}</Text>
-          </View>
+          {chakra.id === 'root' ? (
+            // Painted Root lotus (cut out, transparent) in place of the seed-sound circle
+            <Image
+              source={rootSymbol}
+              style={{ width: compact ? 46 : 58, height: compact ? 47 : 60 }}
+              resizeMode="contain"
+              accessible={false}
+            />
+          ) : (
+            <View style={[styles.symbol, compact && styles.symbolCompact, { backgroundColor: accent }]}>
+              <Text style={styles.symbolText}>{chakra.mantra}</Text>
+            </View>
+          )}
           <Text style={[styles.chakraSanskrit, { color: accent }]}>{chakra.sanskritName.toUpperCase()}</Text>
           <Text style={styles.chakraEnglish}>{chakra.displayName.en}</Text>
 
