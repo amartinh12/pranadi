@@ -6,6 +6,7 @@ import { neutralColors } from '../theme/tokens';
 // font packages' main entry would bundle every weight and bloat the app.
 const FONT_FILES = {
   PlayfairDisplay_700Bold: require('@expo-google-fonts/playfair-display/700Bold/PlayfairDisplay_700Bold.ttf'),
+  PlayfairDisplay_400Regular_Italic: require('@expo-google-fonts/playfair-display/400Regular_Italic/PlayfairDisplay_400Regular_Italic.ttf'),
   DMSans_400Regular: require('@expo-google-fonts/dm-sans/400Regular/DMSans_400Regular.ttf'),
   DMSans_400Regular_Italic: require('@expo-google-fonts/dm-sans/400Regular_Italic/DMSans_400Regular_Italic.ttf'),
   DMSans_500Medium: require('@expo-google-fonts/dm-sans/500Medium/DMSans_500Medium.ttf'),

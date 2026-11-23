@@ -28,6 +28,29 @@ export const fonts = {
   bodyBold:   'DMSans_600SemiBold',
   italic:     'DMSans_400Regular_Italic',
   heading:    'PlayfairDisplay_700Bold',
+  headingItalic: 'PlayfairDisplay_400Regular_Italic',
+} as const;
+
+// ─── Pose Screen ──────────────────────────────────────────────────────────────
+// The card colour matches the illustrations' own background (about #FEFCF8), so
+// pictures blend into the card with no visible edge.
+export const poseColors = {
+  page:     '#FAF7F5', // warm off-white behind the card
+  card:     '#FEFCF8', // equals the artwork background
+  title:    '#1E2235', // near-black navy
+  gray:     '#6B6B6B', // warm gray secondary text
+  hairline: '#EAE4E0', // thin dividers
+} as const;
+
+// Deeper shade of each chakra colour, for text and fills on the pose screen
+export const chakraDeep = {
+  root:        '#B23A3A',
+  sacral:      '#D9722E',
+  solarPlexus: '#C9A227',
+  heart:       '#3FA457',
+  throat:      '#2F8FC9',
+  thirdEye:    '#5048E0',
+  crown:       '#8E5CC7',
 } as const;
 
 // ─── Spacing Scale ────────────────────────────────────────────────────────────

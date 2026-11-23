@@ -21,6 +21,7 @@ export type SessionStep = {
   key:         string;
   name:        LocalizedString;
   description: LocalizedString;   // how to do it, shown on the step's page
+  sanskrit?:   string;            // traditional pose name; warm-ups have none
 };
 
 export type SessionLevel = 'pause' | 'flow' | 'journey';
@@ -58,6 +59,7 @@ export interface Chakra {
   foods:          LocalizedList;
   blockedSummary:  LocalizedString;
   balancedSummary: LocalizedString;
+  qualities?:      LocalizedList;                // three short words shown on the pose screen
   sessions?:       PracticeSession[];            // Pause / Flow / Journey; filled per chakra as ready
 }
 
@@ -65,10 +67,28 @@ export interface Chakra {
 // Source: Drive "PraNadi" folder → "Naming and pose" docs. Numbers match the
 // illustration file names, and sessions always run in numbered order.
 
+// Traditional (Sanskrit) names, by step key. Warm-ups have none.
+const sanskritNames: Record<string, string> = {
+  root_pose1: 'Tadasana', root_pose2: 'Urdhva Hastasana', root_pose3: 'Vrksasana',
+  root_pose4: 'Virabhadrasana I', root_pose5: 'Virabhadrasana II', root_pose6: 'Utkata Konasana',
+  root_pose7: 'Utkatasana', root_pose8: 'Padangusthasana', root_pose9: 'Sukhasana',
+  root_pose10: 'Baddha Konasana', root_pose11: 'Dandasana', root_pose12: 'Malasana',
+  root_pose13: 'Anjaneyasana', root_pose14: 'Balasana', root_pose15: 'Marjaryasana–Bitilasana',
+  root_pose16: 'Ardha Matsyendrasana', root_pose17: 'Bhujangasana', root_pose18: 'Setu Bandha Sarvangasana',
+  root_pose19: 'Apanasana', root_pose20: 'Viparita Karani', root_pose21: 'Savasana',
+  sacral_pose1: 'Tadasana', sacral_pose2: 'Uttanasana', sacral_pose3: 'Prasarita Padottanasana',
+  sacral_pose4: 'Utkata Konasana', sacral_pose5: 'Virabhadrasana II', sacral_pose6: 'Trikonasana',
+  sacral_pose7: 'Adho Mukha Svanasana', sacral_pose8: 'Anjaneyasana', sacral_pose9: 'Utthan Pristhasana',
+  sacral_pose10: 'Eka Pada Rajakapotasana', sacral_pose11: 'Baddha Konasana', sacral_pose12: 'Supta Baddha Konasana',
+  sacral_pose13: 'Ananda Balasana', sacral_pose14: 'Marjaryasana–Bitilasana', sacral_pose15: 'Supta Matsyendrasana',
+  sacral_pose16: 'Setu Bandha Sarvangasana', sacral_pose17: 'Apanasana', sacral_pose18: 'Savasana',
+};
+
 const step = (key: string, en: string, description: string): SessionStep => ({
   key,
   name: { en, es: '' },
   description: { en: description, es: '' },
+  sanskrit: sanskritNames[key],
 });
 const pick = (list: SessionStep[], numbers: number[]): SessionStep[] => numbers.map((n) => list[n - 1]);
 
@@ -278,6 +298,7 @@ export const chakras: Chakra[] = [
     },
     blockedSummary:  { en: 'Fears, anxiety, insecurity, financial problems, disconnection from the body, fatigue', es: '' },
     balancedSummary: { en: 'Sense of stability, basic trust, connection with the body, vital energy, grounding', es: '' },
+    qualities: { en: ['Grounding', 'Stability', 'Calm'], es: [] },
     sessions: rootSessions,
   },
 
@@ -333,6 +354,7 @@ export const chakras: Chakra[] = [
     },
     blockedSummary:  { en: 'Guilt, sexual repression, creative blocks, emotional dependency, addictions', es: '' },
     balancedSummary: { en: 'Emotional fluidity, active creativity, body enjoyment, healthy relationships', es: '' },
+    qualities: { en: ['Flow', 'Creativity', 'Pleasure'], es: [] },
     sessions: sacralSessions,
   },
 
