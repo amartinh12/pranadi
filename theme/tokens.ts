@@ -1,22 +1,22 @@
 // ─── Chakra Colors ───────────────────────────────────────────────────────────
 // Soft, calm tones chosen for a wellness app context.
 export const chakraColors = {
-  root:        '#C44E52', // Red       — grounded, earthy rose-red
-  sacral:      '#F28C4B', // Orange    — warm terracotta
-  solarPlexus: '#F2C94C', // Yellow    — soft golden yellow
-  heart:       '#6DBF7B', // Mint Green — calm sage-mint
-  throat:      '#5DADE2', // Sky Blue  — gentle sky blue
-  thirdEye:    '#6C63FF', // Indigo    — muted indigo-violet
-  crown:       '#B284E6', // Violet    — soft lavender
+  root:        '#B33B3D', // Red
+  sacral:      '#D98145', // Orange
+  solarPlexus: '#DAAC40', // Yellow
+  heart:       '#78946B', // Green
+  throat:      '#6FA8B8', // Blue
+  thirdEye:    '#555D91', // Indigo
+  crown:       '#A17BA6', // Violet
 } as const;
 
 // ─── Neutral Colors ───────────────────────────────────────────────────────────
 export const neutralColors = {
-  background:    '#F6F4F9', // soft lavender-tinted white page background
+  background:    '#FCFAF6', // warm ivory page background
   surface:       '#FFFFFF', // card / sheet surface
-  textPrimary:   '#2D2B6B', // deep indigo — PraNadi brand, body copy and buttons
-  textSecondary: '#6E6C8F', // muted indigo-grey for captions / labels
-  border:        '#E4E1EE', // subtle divider / stroke
+  textPrimary:   '#202435', // deep ink — body copy, headings and primary buttons
+  textSecondary: '#6A6662', // warm gray for captions / labels
+  border:        '#D9D1C8', // warm divider / outline
 } as const;
 
 // ─── Fonts ────────────────────────────────────────────────────────────────────
@@ -35,23 +35,15 @@ export const fonts = {
 // The card colour matches the illustrations' own background (about #FEFCF8), so
 // pictures blend into the card with no visible edge.
 export const poseColors = {
-  page:     '#FAF7F5', // warm off-white behind the card
+  page:     '#FCFAF6', // warm ivory behind the card
   card:     '#FEFCF8', // equals the artwork background
-  title:    '#1E2235', // near-black navy
-  gray:     '#6B6B6B', // warm gray secondary text
-  hairline: '#EAE4E0', // thin dividers
+  title:    '#202435', // deep ink
+  gray:     '#6A6662', // warm gray secondary text
+  hairline: '#D9D1C8', // dividers
 } as const;
 
-// Deeper shade of each chakra colour, for text and fills on the pose screen
-export const chakraDeep = {
-  root:        '#B23A3A',
-  sacral:      '#D9722E',
-  solarPlexus: '#C9A227',
-  heart:       '#3FA457',
-  throat:      '#2F8FC9',
-  thirdEye:    '#5048E0',
-  crown:       '#8E5CC7',
-} as const;
+// Kept as an alias so older imports keep working
+export const chakraDeep = chakraColors; // one accent per chakra, used everywhere
 
 // ─── Spacing Scale ────────────────────────────────────────────────────────────
 export const spacing = {
@@ -72,6 +64,6 @@ export const fontSize = {
 
 // ─── Welcome Screen Colors ────────────────────────────────────────────────────
 export const welcomeColors = {
-  deepIndigo:  '#2D2B6B', // pill button background
+  deepIndigo:  '#202435', // primary button background (deep ink)
   scrimLight:  'rgba(247, 245, 242, 0.52)', // subtle light scrim behind text
 } as const;
