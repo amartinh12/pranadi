@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import {
@@ -158,6 +159,7 @@ export default function QuizScreen() {
         </TouchableOpacity>
 
       </View>
+      <StartOver />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { useRouter } from 'expo-router';
 import { neutralColors, spacing, fontSize } from '../theme/tokens';
 
@@ -11,6 +12,7 @@ export default function ClosingReflectionScreen() {
       <TouchableOpacity style={styles.button} onPress={() => router.replace('/')}>
         <Text style={styles.buttonText}>Done</Text>
       </TouchableOpacity>
+      <StartOver confirm={false} />
     </View>
   );
 }

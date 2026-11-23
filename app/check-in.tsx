@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Image, LayoutChangeEvent, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { chakraColors, neutralColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
@@ -115,6 +116,7 @@ export default function CheckInScreen() {
         </TouchableOpacity>
       </View>
 
+      <StartOver />
     </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { neutralColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
@@ -42,6 +43,7 @@ export default function IntroScreen() {
         </TouchableOpacity>
 
       </View>
+      <StartOver />
     </SafeAreaView>
   );
 }

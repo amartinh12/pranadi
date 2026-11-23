@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import {
@@ -69,6 +70,7 @@ export default function ChakraOfTheDayScreen() {
         </TouchableOpacity>
 
       </ScrollView>
+      <StartOver />
     </SafeAreaView>
   );
 }

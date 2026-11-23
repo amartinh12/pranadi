@@ -1,5 +1,6 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
+import { StartOver } from '../components/StartOver';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { chakraColors, neutralColors, spacing, fontSize } from '../theme/tokens';
 import { chakras } from '../content/chakras';
@@ -47,6 +48,7 @@ export default function IntensityScreen() {
           <Text style={[styles.buttonText, { color: onAccent }]}>Start practice</Text>
         </TouchableOpacity>
       )}
+      <StartOver />
     </View>
   );
 }
