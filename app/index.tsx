@@ -62,7 +62,6 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingHorizontal: spacing.xl,
     paddingBottom: spacing.lg,
-    backgroundColor: welcomeColors.scrimLight,
   },
   title: {
     fontFamily: 'PlayfairDisplay_700Bold',
@@ -107,7 +106,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: spacing.lg,
     paddingBottom: spacing.xl,
-    backgroundColor: welcomeColors.scrimLight,
   },
   button: {
     flexDirection: 'row',
