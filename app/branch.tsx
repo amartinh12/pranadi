@@ -15,8 +15,8 @@ const CARD_Y0 = 1191;
 const CARD_Y1 = 1752;
 const LEFT_CARD = { x0: 50, x1: 456 };
 const RIGHT_CARD = { x0: 484, x1: 893 };
-const TEXT_Y0 = 1405;   // below each card's little illustration
-const TEXT_Y1 = 1650;   // above the hills inside each card
+const TEXT_Y0 = 1425;   // clear of each card's little illustration (it ends near 1395)
+const TEXT_Y1 = 1655;   // above the hills inside each card
 const HEADING_Y0 = 760; // open paper between the lotus and the cards
 const HEADING_Y1 = 1000;
 const PAPER = '#FFF1E0'; // the artwork's paper colour (shows only beside the art on short screens)
@@ -37,8 +37,10 @@ export default function BranchScreen() {
   const Y = (y: number) => top0 + y * scale;
 
   const cardW = (LEFT_CARD.x1 - LEFT_CARD.x0) * scale;
-  const titleSize = clamp(cardW * 0.105, 14, 21);
-  const descSize = clamp(cardW * 0.073, 11, 14.5);
+  // Both cards share these sizes, so two title lines + two description lines always fit
+  // between the illustration and the hills.
+  const titleSize = clamp(cardW * 0.11, 14, 21);
+  const descSize = clamp(cardW * 0.075, 11, 14.5);
   const headingSize = clamp(width * 0.088, 26, 38);
 
   const cards = [
@@ -55,7 +57,7 @@ export default function BranchScreen() {
       rect: RIGHT_CARD,
       title: 'Check in with\nyourself',
       label: 'Check in with yourself',
-      description: 'Answer a few questions to discover which chakra needs care.',
+      description: 'Answer a few questions to find your focus.',
       onPress: () => router.push('/quiz'),
     },
   ];
@@ -100,11 +102,11 @@ export default function BranchScreen() {
           <View
             style={[
               styles.cardText,
-              { top: (TEXT_Y0 - CARD_Y0) * scale, height: (TEXT_Y1 - TEXT_Y0) * scale, paddingHorizontal: cardW * 0.08 },
+              { top: (TEXT_Y0 - CARD_Y0) * scale, height: (TEXT_Y1 - TEXT_Y0) * scale, paddingHorizontal: cardW * 0.06 },
             ]}
           >
-            <Text style={[styles.cardTitle, { fontSize: titleSize, lineHeight: titleSize * 1.25 }]}>{card.title}</Text>
-            <Text style={[styles.cardDescription, { fontSize: descSize, lineHeight: descSize * 1.4 }]}>
+            <Text maxFontSizeMultiplier={1.15} style={[styles.cardTitle, { fontSize: titleSize, lineHeight: titleSize * 1.2 }]}>{card.title}</Text>
+            <Text maxFontSizeMultiplier={1.15} style={[styles.cardDescription, { fontSize: descSize, lineHeight: descSize * 1.35 }]}>
               {card.description}
             </Text>
           </View>
@@ -141,15 +143,16 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // both cards start at the same height
   },
   cardTitle: {
     fontFamily: fonts.heading,
     color: neutralColors.textPrimary,
     textAlign: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   cardDescription: {
+    fontFamily: fonts.body,
     color: neutralColors.textSecondary,
     textAlign: 'center',
   },
