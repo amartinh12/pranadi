@@ -5,47 +5,39 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { chakraColors, neutralColors, spacing, fontSize } from '../theme/tokens';
 import { chakras } from '../content/chakras';
 
-// Dark text on light chakra colors (e.g. yellow), white text on the rest
-function readableOn(hex: string): string {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.7 ? neutralColors.textPrimary : neutralColors.surface;
-}
-
+// "Choose your rhythm": the page and heading stay in the classic ink-on-ivory theme;
+// the chosen chakra's colour appears only as a small accent on each choice.
 export default function IntensityScreen() {
   const router = useRouter();
   const { chakraId } = useLocalSearchParams<{ chakraId?: string }>();
   const chakra = chakras.find(c => c.id === chakraId);
   const sessions = chakra?.sessions;
-
-  // The chosen chakra's color; falls back to the brand indigo if none was passed
-  const accent = chakra ? chakraColors[chakra.colorToken] : neutralColors.textPrimary;
-  const onAccent = readableOn(accent);
+  const accent = chakra ? chakraColors[chakra.colorToken] : neutralColors.border;
 
   return (
-    <View style={[styles.container, { backgroundColor: chakra ? `${accent}1F` : neutralColors.background }]}>
-      <Text style={[styles.heading, { color: accent }]}>Choose your rhythm</Text>
+    <View style={styles.container}>
+      <Text style={styles.heading}>Choose your rhythm</Text>
 
       {sessions ? (
         sessions.map(session => (
           <TouchableOpacity
             key={session.level}
-            style={[styles.button, { backgroundColor: accent }]}
+            style={styles.button}
             onPress={() =>
               router.push({ pathname: '/practice', params: { chakraId, level: session.level } })
             }
           >
-            <Text style={[styles.buttonText, { color: onAccent }]}>
+            <View style={[styles.dot, { backgroundColor: accent }]} />
+            <Text style={styles.buttonText}>
               {session.name.en} · {session.minutes} min
             </Text>
           </TouchableOpacity>
         ))
       ) : (
         // Chakras without sessions yet keep the original single button
-        <TouchableOpacity style={[styles.button, { backgroundColor: accent }]} onPress={() => router.push('/practice')}>
-          <Text style={[styles.buttonText, { color: onAccent }]}>Start practice</Text>
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/practice')}>
+          <View style={[styles.dot, { backgroundColor: accent }]} />
+          <Text style={styles.buttonText}>Start practice</Text>
         </TouchableOpacity>
       )}
       <StartOver />
@@ -68,11 +60,19 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   button: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: neutralColors.textPrimary,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    borderRadius: 16,
+    borderRadius: 28,
     marginBottom: spacing.md,
+    gap: spacing.sm,
+  },
+  dot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
   },
   buttonText: {
     color: neutralColors.surface,

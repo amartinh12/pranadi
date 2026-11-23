@@ -35,7 +35,7 @@ export default function ChakraOfTheDayScreen() {
         <View style={[styles.orb, { backgroundColor: accent }]} />
 
         {/* ── Chakra name ── */}
-        <Text style={[styles.chakraName, { color: accent }]}>
+        <Text style={styles.chakraName}>
           {chakra.displayName.en}
         </Text>
 
@@ -61,7 +61,7 @@ export default function ChakraOfTheDayScreen() {
 
         {/* ── Continue ── */}
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: accent, shadowColor: accent }]}
+          style={[styles.button, { backgroundColor: neutralColors.textPrimary, shadowColor: neutralColors.textPrimary }]}
           onPress={() => router.push({ pathname: '/intensity', params: { chakraId: chakra.id } })}
           activeOpacity={0.82}
         >
@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
   chakraName: {
     fontSize: fontSize.heading,
     fontWeight: '700',
+    color: neutralColors.textPrimary,
     textAlign: 'center',
     marginBottom: spacing.md,
     letterSpacing: 0.3,
