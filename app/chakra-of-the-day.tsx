@@ -1,18 +1,19 @@
 import { Image, ScrollView, StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Text } from '../components/Text';
 import { StartOver } from '../components/StartOver';
-import { ChakraSymbol } from '../components/ChakraSymbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { chakraColors, fonts, neutralColors } from '../theme/tokens';
 import { chakras } from '../content/chakras';
 
 // Chakra introduction. The watercolour (botanical corners and hills only, no symbol or
-// cards) is shared by all seven chakras; the symbol, divider, affirmation accent and
+// cards) is shared by all seven chakras; the divider, affirmation accent and
 // Continue button take the chosen chakra's colour. Everything written is real UI.
 const artwork = require('../assets/chakra-intro.jpg');
+const rootArtwork = require('../assets/chakra-intro-root.jpg'); // same page with the painted Root lotus
 const ART_W = 941;
 const ART_H = 2072;
+const LOTUS_BOTTOM = 385; // bottom of the painted lotus's glow, in artwork pixels
 const HILLS_TOP = 1815; // where the painted hills begin, in artwork pixels
 const PAPER = '#FDEDDC';
 const CARD = '#FEFCFA';
@@ -50,13 +51,15 @@ export default function ChakraOfTheDayScreen() {
 
   const BUTTON_H = 56;
   const footerBottom = Math.max(insets.bottom + 12, height - hillsY + 4);
-  const symbol = Math.min(Math.max(width * 0.27, 96), 130);
+  // Room for the painted lotus at the top of the page (Root only for now)
+  const isRoot = chakra.id === 'root';
+  const lotusSpace = isRoot ? Math.max(0, top0 + LOTUS_BOTTOM * scale - (insets.top + 14)) : 0;
   const titleSize = Math.min(Math.max(width * 0.092, 32), 38);
 
   return (
     <View style={styles.screen}>
       <Image
-        source={artwork}
+        source={isRoot ? rootArtwork : artwork}
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
         accessible={false}
       />
@@ -66,7 +69,7 @@ export default function ChakraOfTheDayScreen() {
         contentContainerStyle={[styles.scroll, { paddingTop: insets.top + 14 }]}
         showsVerticalScrollIndicator={false}
       >
-        <ChakraSymbol id={chakra.colorToken} color={accent} mantra={chakra.mantra} size={symbol} onColor={ink} />
+        <View style={{ height: lotusSpace }} />
 
         <Text style={[styles.title, { fontSize: titleSize, lineHeight: titleSize * 1.2 }]} accessibilityRole="header">
           {chakra.displayName.en}
