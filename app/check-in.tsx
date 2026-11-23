@@ -1,217 +1,203 @@
 import { useState } from 'react';
-import { Image, LayoutChangeEvent, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, Pressable, StyleSheet, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { Text } from '../components/Text';
 import { StartOver } from '../components/StartOver';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { chakraColors, neutralColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
+import { chakraColors, fonts, neutralColors } from '../theme/tokens';
 
-const bodyImage = require('../assets/welcome-background.jpg'); // same artwork as the welcome screen
+// Watercolour artwork with the seven chakra symbols painted into it. It is the original
+// illustration with extra plain paper added above the figure (so it fills tall phones
+// without stretching, and leaves room for the heading). The symbols are NOT redrawn:
+// invisible touch targets sit over them, placed from the artwork's own geometry, so they
+// stay aligned at any screen size. Positions below are in the artwork's pixels.
+const artwork = require('../assets/select-chakra.jpg');
+const ART_W = 941;
+const ART_H = 2072;
+const FIGURE_X = 471; // the symbols sit on the figure's centre line
+const HEADING_Y0 = 335; // open paper above the figure (below the corner branches)
+const HEADING_Y1 = 700;
+const PAPER = '#FDEDDC'; // the artwork's paper colour (shows only beside the art on short screens)
 
-// Natural size of the artwork (941 × 1672)
-const IMG_W = 941;
-const IMG_H = 1672;
-
-// Tap zones, one per glowing chakra in the image. `f` is the glow's centre as a
-// fraction of image height (measured from the artwork; the figure is centred
-// horizontally). The artwork has eight glows for seven chakras: the amber glow
-// between yellow and orange counts as Solar Plexus, so both glows select it.
+// Top to bottom
 const CHAKRA_ZONES = [
-  { id: 'crown'       as const, f: 0.3798, label: 'Crown' },
-  { id: 'thirdEye'    as const, f: 0.4127, label: 'Third Eye' },
-  { id: 'throat'      as const, f: 0.4988, label: 'Throat' },
-  { id: 'heart'       as const, f: 0.5460, label: 'Heart' },
-  { id: 'solarPlexus' as const, f: 0.5933, label: 'Solar Plexus' },
-  { id: 'solarPlexus' as const, f: 0.6370, label: 'Solar Plexus' },
-  { id: 'sacral'      as const, f: 0.6818, label: 'Sacral' },
-  { id: 'root'        as const, f: 0.7255, label: 'Root' },
+  { id: 'crown'       as const, y: 894,  label: 'Crown' },
+  { id: 'thirdEye'    as const, y: 977,  label: 'Third Eye' },
+  { id: 'throat'      as const, y: 1166, label: 'Throat' },
+  { id: 'heart'       as const, y: 1272, label: 'Heart' },
+  { id: 'solarPlexus' as const, y: 1390, label: 'Solar Plexus' },
+  { id: 'sacral'      as const, y: 1509, label: 'Sacral' },
+  { id: 'root'        as const, y: 1623, label: 'Root' },
 ];
-const FIRST_GLOW = 0.3798;
-const LAST_GLOW  = 0.7255;
-const COLUMN_CENTRE = (FIRST_GLOW + LAST_GLOW) / 2;
 
 type ChakraId = (typeof CHAKRA_ZONES)[number]['id'];
 
-const ZONE_RADIUS = 24; // tap target half-size in points (48pt diameter)
+const MIN_TARGET = 44; // accessible minimum touch target, in points
+const RING = 54;       // selection ring diameter, in points
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
 export default function CheckInScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const [selected, setSelected] = useState<ChakraId | null>(null);
-  const [containerSize, setContainerSize] = useState({ w: 0, h: 0 });
 
-  function onContainerLayout(e: LayoutChangeEvent) {
-    const { width, height } = e.nativeEvent.layout;
-    setContainerSize({ w: width, h: height });
-  }
+  // Phones are taller than the artwork, so "cover" it (a hair of paper is trimmed at the top
+  // and bottom). On short or wide screens, fit it whole instead.
+  const tall = height / width >= 1.95;
+  const scale = tall ? Math.max(width / ART_W, height / ART_H) : Math.min(width / ART_W, height / ART_H);
+  const left0 = (width - ART_W * scale) / 2;
+  const top0 = (height - ART_H * scale) / 2;
+  const X = (x: number) => left0 + x * scale;
+  const Y = (y: number) => top0 + y * scale;
 
-  // Zoom the artwork so the column of chakras fills most of the available height
-  // (never smaller than "cover", so there are no empty edges), centred on the column.
-  const { w: cw, h: ch } = containerSize;
-  let imgW = 0, imgH = 0, imgLeft = 0, imgTop = 0;
-  if (cw > 0 && ch > 0) {
-    const coverScale = Math.max(cw / IMG_W, ch / IMG_H);
-    const columnScale = (ch * 0.72) / ((LAST_GLOW - FIRST_GLOW) * IMG_H);
-    const scale = Math.max(coverScale, columnScale);
-    imgW = IMG_W * scale;
-    imgH = IMG_H * scale;
-    imgLeft = (cw - imgW) / 2;
-    imgTop = Math.min(0, Math.max(ch - imgH, ch / 2 - COLUMN_CENTRE * imgH));
-  }
+  const target = Math.max(MIN_TARGET, 70 * scale);
+  const headingSize = clamp(width * 0.088, 28, 38);
+  const subSize = clamp(width * 0.043, 15, 18);
 
   function handleZonePress(id: ChakraId) {
     setSelected(prev => (prev === id ? null : id));
   }
 
+  const canContinue = selected !== null;
+
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.screen}>
+      <Image
+        source={artwork}
+        style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
+        accessible={false}
+      />
 
-      {/* ── Heading ── */}
-      <View style={styles.headerArea}>
-        <Text style={styles.heading}>Where do you feel it today?</Text>
-        <Text style={styles.subheading}>Tap the area that calls your attention.</Text>
+      {/* ── Heading, in the open paper above the figure ── */}
+      <View style={[styles.headingBox, { top: Y(HEADING_Y0), height: (HEADING_Y1 - HEADING_Y0) * scale }]}>
+        <Text
+          style={[styles.heading, { fontSize: headingSize, lineHeight: headingSize * 1.25 }]}
+          accessibilityRole="header"
+        >
+          Where do you{'\n'}feel it today?
+        </Text>
+        <Text style={[styles.subheading, { fontSize: subSize }]}>Tap the area that calls your attention.</Text>
       </View>
 
-      {/* ── Body image + tap zones ── */}
-      <View style={styles.imageWrapper} onLayout={onContainerLayout}>
-        {cw > 0 && (
-          <Image
-            source={bodyImage}
-            style={{ position: 'absolute', left: imgLeft, top: imgTop, width: imgW, height: imgH }}
+      {/* ── Selection ring: drawn only for the chosen chakra, over its painted symbol ── */}
+      {CHAKRA_ZONES.map(zone =>
+        selected === zone.id ? (
+          <View
+            key={`ring-${zone.id}`}
+            pointerEvents="none"
+            style={[
+              styles.ring,
+              {
+                left: X(FIGURE_X) - RING / 2,
+                top: Y(zone.y) - RING / 2,
+                width: RING,
+                height: RING,
+                borderRadius: RING / 2,
+                borderColor: chakraColors[zone.id],
+                backgroundColor: `${chakraColors[zone.id]}26`,
+              },
+            ]}
           />
-        )}
+        ) : null,
+      )}
 
-        {/* Render zones only once layout is known */}
-        {cw > 0 && CHAKRA_ZONES.map((zone, index) => {
-          const isSelected = selected === zone.id;
-          const color = chakraColors[zone.id];
-          // Shrink a zone if its neighbours are closer than a full tap circle
-          const neighbours = [CHAKRA_ZONES[index - 1], CHAKRA_ZONES[index + 1]].filter(Boolean);
-          const nearest = Math.min(...neighbours.map(n => Math.abs(n!.f - zone.f) * imgH));
-          const r = Math.min(ZONE_RADIUS, Math.max(14, nearest / 2));
-          const left = imgLeft + imgW * 0.5 - r;
-          const top  = imgTop  + imgH * zone.f - r;
-          return (
-            <TouchableOpacity
-              key={`${zone.id}-${index}`}
-              style={[
-                styles.zone,
-                {
-                  left,
-                  top,
-                  width: r * 2,
-                  height: r * 2,
-                  borderRadius: r,
-                  borderColor:       isSelected ? color : 'transparent',
-                  backgroundColor:   isSelected ? `${color}40` : 'transparent',
-                  shadowColor:       color,
-                  shadowOpacity:     isSelected ? 0.65 : 0,
-                },
-              ]}
-              onPress={() => handleZonePress(zone.id)}
-              activeOpacity={0.7}
-              accessibilityLabel={`${zone.label} chakra`}
-              accessibilityRole="button"
-            />
-          );
-        })}
-      </View>
+      {/* ── Seven invisible touch targets over the painted symbols ── */}
+      {CHAKRA_ZONES.map(zone => (
+        <Pressable
+          key={zone.id}
+          onPress={() => handleZonePress(zone.id)}
+          accessibilityRole="button"
+          accessibilityLabel={`${zone.label} chakra`}
+          accessibilityState={{ selected: selected === zone.id }}
+          style={{
+            position: 'absolute',
+            left: X(FIGURE_X) - target / 2,
+            top: Y(zone.y) - target / 2,
+            width: target,
+            height: target,
+            borderRadius: target / 2,
+          }}
+        />
+      ))}
 
-      {/* ── Continue button ── */}
-      {/* Empty selection is allowed; falls back to root chakra as default */}
-      <View style={styles.bottomArea}>
+      {/* ── Continue: enabled once a chakra is chosen ── */}
+      <View style={[styles.bottom, { paddingBottom: insets.bottom + 16 }]}>
         <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            router.push(
-              `/chakra-of-the-day?chakraId=${selected ?? 'root'}` as never,
-            )
-          }
-          activeOpacity={0.82}
+          style={[styles.button, !canContinue && styles.buttonDisabled]}
+          onPress={() => canContinue && router.push(`/chakra-of-the-day?chakraId=${selected}` as never)}
+          activeOpacity={canContinue ? 0.85 : 1}
+          disabled={!canContinue}
+          accessibilityRole="button"
+          accessibilityLabel="Continue"
+          accessibilityState={{ disabled: !canContinue }}
         >
           <Text style={styles.buttonText}>Continue</Text>
           <Text style={styles.buttonArrow}>→</Text>
         </TouchableOpacity>
       </View>
 
-      <StartOver />
-    </SafeAreaView>
+      <StartOver plain />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {
+  screen: {
     flex: 1,
-    backgroundColor: neutralColors.background,
+    backgroundColor: PAPER,
   },
-
-  // ── Header ─────────────────────────────────────────────────────────────────
-  headerArea: {
+  headingBox: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.md,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
   heading: {
-    fontSize: fontSize.heading,
-    fontWeight: '700',
+    fontFamily: fonts.heading,
     color: neutralColors.textPrimary,
     textAlign: 'center',
-    marginBottom: spacing.xs,
   },
   subheading: {
-    fontSize: fontSize.body,
     color: neutralColors.textSecondary,
     textAlign: 'center',
+    marginTop: 10,
   },
-
-  // ── Image wrapper ───────────────────────────────────────────────────────────
-  imageWrapper: {
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
-  },
-
-  // ── Tap zones ──────────────────────────────────────────────────────────────
-  zone: {
+  ring: {
     position: 'absolute',
-    width:  ZONE_RADIUS * 2,
-    height: ZONE_RADIUS * 2,
-    borderRadius: ZONE_RADIUS,
     borderWidth: 2.5,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 10,
-    elevation: 4,
   },
-
-  // ── Bottom area ─────────────────────────────────────────────────────────────
-  bottomArea: {
+  bottom: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
-    paddingBottom: spacing.xl,
-    paddingTop: spacing.md,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: welcomeColors.deepIndigo,
-    paddingVertical: spacing.md,
-    paddingHorizontal: 36,
-    borderRadius: 50,
-    gap: spacing.sm,
-    shadowColor: welcomeColors.deepIndigo,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
-    elevation: 7,
+    backgroundColor: neutralColors.textPrimary,
+    paddingVertical: 16,
+    paddingHorizontal: 56,
+    borderRadius: 28,
+    gap: 8,
+  },
+  buttonDisabled: {
+    opacity: 0.35,
   },
   buttonText: {
-    color: neutralColors.surface,
-    fontSize: fontSize.body,
-    fontWeight: '600',
-    letterSpacing: 1,
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '500',
+    letterSpacing: 0.5,
   },
   buttonArrow: {
-    color: neutralColors.surface,
-    fontSize: fontSize.body,
+    color: '#FFFFFF',
+    fontSize: 17,
     fontWeight: '400',
   },
 });
