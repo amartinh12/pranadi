@@ -6,25 +6,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { chakraColors, neutralColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
 
-const bodyImage = require('../assets/checkin-body.png');
+const bodyImage = require('../assets/welcome-background.jpg'); // same artwork as the welcome screen
 
-// Natural image size after optimization: 430 × 929
-const IMG_ASPECT = 430 / 929; // ≈ 0.463 (portrait)
+// Natural size of the artwork (941 × 1672)
+const IMG_W = 941;
+const IMG_H = 1672;
 
-// Seven chakra tap zones — topFrac is the fraction of image height to the centre of each dot
+// Tap zones, one per glowing chakra in the image. `f` is the glow's centre as a
+// fraction of image height (measured from the artwork; the figure is centred
+// horizontally). The artwork has eight glows for seven chakras: the amber glow
+// between yellow and orange counts as Solar Plexus, so both glows select it.
 const CHAKRA_ZONES = [
-  { id: 'crown'       as const, topFrac: 0.20, label: 'Crown' },
-  { id: 'thirdEye'    as const, topFrac: 0.28, label: 'Third Eye' },
-  { id: 'throat'      as const, topFrac: 0.37, label: 'Throat' },
-  { id: 'heart'       as const, topFrac: 0.46, label: 'Heart' },
-  { id: 'solarPlexus' as const, topFrac: 0.55, label: 'Solar Plexus' },
-  { id: 'sacral'      as const, topFrac: 0.63, label: 'Sacral' },
-  { id: 'root'        as const, topFrac: 0.71, label: 'Root' },
+  { id: 'crown'       as const, f: 0.3798, label: 'Crown' },
+  { id: 'thirdEye'    as const, f: 0.4127, label: 'Third Eye' },
+  { id: 'throat'      as const, f: 0.4988, label: 'Throat' },
+  { id: 'heart'       as const, f: 0.5460, label: 'Heart' },
+  { id: 'solarPlexus' as const, f: 0.5933, label: 'Solar Plexus' },
+  { id: 'solarPlexus' as const, f: 0.6370, label: 'Solar Plexus' },
+  { id: 'sacral'      as const, f: 0.6818, label: 'Sacral' },
+  { id: 'root'        as const, f: 0.7255, label: 'Root' },
 ];
+const FIRST_GLOW = 0.3798;
+const LAST_GLOW  = 0.7255;
+const COLUMN_CENTRE = (FIRST_GLOW + LAST_GLOW) / 2;
 
 type ChakraId = (typeof CHAKRA_ZONES)[number]['id'];
 
-const ZONE_RADIUS = 26; // tap target half-size in points (52pt diameter)
+const ZONE_RADIUS = 24; // tap target half-size in points (48pt diameter)
 
 export default function CheckInScreen() {
   const router = useRouter();
@@ -36,21 +44,18 @@ export default function CheckInScreen() {
     setContainerSize({ w: width, h: height });
   }
 
-  // Compute displayed image bounds within the flex container (resizeMode="contain")
+  // Zoom the artwork so the column of chakras fills most of the available height
+  // (never smaller than "cover", so there are no empty edges), centred on the column.
   const { w: cw, h: ch } = containerSize;
   let imgW = 0, imgH = 0, imgLeft = 0, imgTop = 0;
   if (cw > 0 && ch > 0) {
-    if (cw / ch > IMG_ASPECT) {
-      // Container is wider than the image — image fills height
-      imgH = ch;
-      imgW = ch * IMG_ASPECT;
-    } else {
-      // Container is taller than the image — image fills width
-      imgW = cw;
-      imgH = cw / IMG_ASPECT;
-    }
+    const coverScale = Math.max(cw / IMG_W, ch / IMG_H);
+    const columnScale = (ch * 0.72) / ((LAST_GLOW - FIRST_GLOW) * IMG_H);
+    const scale = Math.max(coverScale, columnScale);
+    imgW = IMG_W * scale;
+    imgH = IMG_H * scale;
     imgLeft = (cw - imgW) / 2;
-    imgTop  = (ch - imgH) / 2;
+    imgTop = Math.min(0, Math.max(ch - imgH, ch / 2 - COLUMN_CENTRE * imgH));
   }
 
   function handleZonePress(id: ChakraId) {
@@ -68,22 +73,34 @@ export default function CheckInScreen() {
 
       {/* ── Body image + tap zones ── */}
       <View style={styles.imageWrapper} onLayout={onContainerLayout}>
-        <Image source={bodyImage} style={styles.bodyImage} resizeMode="contain" />
+        {cw > 0 && (
+          <Image
+            source={bodyImage}
+            style={{ position: 'absolute', left: imgLeft, top: imgTop, width: imgW, height: imgH }}
+          />
+        )}
 
         {/* Render zones only once layout is known */}
-        {cw > 0 && CHAKRA_ZONES.map((zone) => {
+        {cw > 0 && CHAKRA_ZONES.map((zone, index) => {
           const isSelected = selected === zone.id;
           const color = chakraColors[zone.id];
-          const left = imgLeft + imgW * 0.5 - ZONE_RADIUS;
-          const top  = imgTop  + imgH * zone.topFrac - ZONE_RADIUS;
+          // Shrink a zone if its neighbours are closer than a full tap circle
+          const neighbours = [CHAKRA_ZONES[index - 1], CHAKRA_ZONES[index + 1]].filter(Boolean);
+          const nearest = Math.min(...neighbours.map(n => Math.abs(n!.f - zone.f) * imgH));
+          const r = Math.min(ZONE_RADIUS, Math.max(14, nearest / 2));
+          const left = imgLeft + imgW * 0.5 - r;
+          const top  = imgTop  + imgH * zone.f - r;
           return (
             <TouchableOpacity
-              key={zone.id}
+              key={`${zone.id}-${index}`}
               style={[
                 styles.zone,
                 {
                   left,
                   top,
+                  width: r * 2,
+                  height: r * 2,
+                  borderRadius: r,
                   borderColor:       isSelected ? color : 'transparent',
                   backgroundColor:   isSelected ? `${color}40` : 'transparent',
                   shadowColor:       color,
@@ -151,10 +168,7 @@ const styles = StyleSheet.create({
   imageWrapper: {
     flex: 1,
     position: 'relative',
-  },
-  bodyImage: {
-    width: '100%',
-    height: '100%',
+    overflow: 'hidden',
   },
 
   // ── Tap zones ──────────────────────────────────────────────────────────────
