@@ -7,7 +7,8 @@ import { neutralColors, spacing, fontSize } from '../theme/tokens';
 // A small "Start over" button for the top-right corner of every screen after the
 // welcome screen. It returns to the beginning. Nothing is saved, so starting over
 // simply drops whatever the person had chosen so far.
-export function StartOver({ confirm = true }: { confirm?: boolean }) {
+// `plain` drops the pill background, for screens where it would sit over artwork.
+export function StartOver({ confirm = true, plain = false }: { confirm?: boolean; plain?: boolean }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -26,7 +27,7 @@ export function StartOver({ confirm = true }: { confirm?: boolean }) {
 
   return (
     <TouchableOpacity
-      style={[styles.button, { top: insets.top }]}
+      style={[styles.button, { top: insets.top }, plain && styles.plain]}
       onPress={onPress}
       accessibilityLabel="Start over"
       hitSlop={8}
@@ -45,6 +46,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
     borderRadius: 14,
     backgroundColor: 'rgba(255, 255, 255, 0.75)',
+  },
+  plain: {
+    backgroundColor: 'transparent',
   },
   text: {
     fontSize: fontSize.small,
