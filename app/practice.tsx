@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, Animated, Easing, Image, ScrollView, StyleSheet, TouchableOpacity, View, useWindowDimensions,
+  Alert, Animated, Easing, Image, StyleSheet, TouchableOpacity, View, useWindowDimensions,
 } from 'react-native';
 import { Text } from '../components/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,17 +12,7 @@ import { poseImages } from '../content/poseImages';
 const formatTime = (total: number) =>
   `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 
-// ─── Small line icons, drawn with plain Views (no icon library) ───────────────
-
-function ClockIcon({ color }: { color: string }) {
-  return (
-    <View style={[styles.clock, { borderColor: color }]}>
-      <View style={[styles.clockHandUp, { backgroundColor: color }]} />
-      <View style={[styles.clockHandSide, { backgroundColor: color }]} />
-    </View>
-  );
-}
-
+// Small sprout line icon, drawn with plain Views (no icon library)
 function SproutIcon({ color }: { color: string }) {
   return (
     <View style={styles.sprout}>
@@ -33,24 +23,25 @@ function SproutIcon({ color }: { color: string }) {
   );
 }
 
-// One page of the practice: a centered card with the chakra header, pose name,
-// illustration (blends into the card), description, qualities and a quiet
-// "Start" timer row. Its timer lives only in this component's state and starts
-// fresh on each page.
+// One page of the practice, all on one screen: a centered card with the chakra
+// header, pose name, illustration (blends into the card), description,
+// qualities and the countdown. The big button below starts the timer, then
+// pauses/resumes it, and becomes Next once the time is up. The timer lives only
+// in this component's state and starts fresh on each page.
 function StepPage({
-  step, seconds, chakra, accent, label, nav, onExit,
+  step, seconds, chakra, accent, label, isLast, onBack, onNext, onExit,
 }: {
-  step: SessionStep; seconds: number; chakra: Chakra; accent: string;
-  label: string; nav: ReactNode; onExit: () => void;
+  step: SessionStep; seconds: number; chakra: Chakra; accent: string; label: string;
+  isLast: boolean; onBack?: () => void; onNext: () => void; onExit: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
+  const compact = windowHeight < 740; // smaller phones: tighter text, no qualities row
   const [started, setStarted] = useState(false);
   const [running, setRunning] = useState(false);
   const [remaining, setRemaining] = useState(seconds);
   const progress = useRef(new Animated.Value(0)).current;
   const image = poseImages[step.key];
-  const imageHeight = Math.min(360, Math.max(240, windowHeight * 0.38));
 
   useEffect(() => {
     if (!running || remaining <= 0) return;
@@ -70,21 +61,23 @@ function StepPage({
 
   const done = remaining <= 0;
 
-  const onStartPress = () => {
+  // The main button: Start → Pause/Resume → Next (or Finish)
+  const buttonLabel = !started ? 'Start' : done ? (isLast ? 'Finish' : 'Next') : running ? 'Pause' : 'Resume';
+  const onButtonPress = () => {
     if (!started) {
       setStarted(true);
       setRunning(true);
-    } else if (!done) {
+    } else if (done) {
+      onNext();
+    } else {
       setRunning(r => !r);
     }
   };
 
   const qualities = chakra.qualities?.en ?? [];
-  const startLabel = !started ? 'Start' : done ? 'Done' : formatTime(remaining);
-  const caption = !started || done ? '' : running ? 'Tap to pause' : 'Paused · tap to resume';
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + spacing.sm }]}>
+    <View style={[styles.screen, { paddingTop: insets.top + spacing.xs }]}>
       {/* Header: exit on the left, progress centered */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerSide} onPress={onExit} accessibilityLabel="Exit practice" hitSlop={8}>
@@ -94,29 +87,29 @@ function StepPage({
         <View style={styles.headerSide} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={styles.card}>
+      <View style={styles.cardWrap}>
+        <View style={[styles.card, compact && styles.cardCompact]}>
           {/* Chakra header */}
-          <View style={[styles.symbol, { backgroundColor: accent }]}>
+          <View style={[styles.symbol, compact && styles.symbolCompact, { backgroundColor: accent }]}>
             <Text style={styles.symbolText}>{chakra.mantra}</Text>
           </View>
           <Text style={[styles.chakraSanskrit, { color: accent }]}>{chakra.sanskritName.toUpperCase()}</Text>
           <Text style={styles.chakraEnglish}>{chakra.displayName.en}</Text>
 
           {/* Pose name */}
-          <Text style={styles.poseName}>{step.name.en}</Text>
+          <Text style={[styles.poseName, compact && styles.poseNameCompact]}>{step.name.en}</Text>
           {step.sanskrit && <Text style={[styles.poseSanskrit, { color: accent }]}>{step.sanskrit}</Text>}
 
-          {/* Illustration: same colour as the card, so it blends in */}
-          <View style={[styles.imageBox, { height: imageHeight }]}>
+          {/* Illustration: takes all the space left, same colour as the card so it blends in */}
+          <View style={styles.imageBox}>
             {image && <Image source={image} style={styles.image} resizeMode="contain" />}
           </View>
 
           <View style={styles.divider} />
 
-          <Text style={styles.description}>{step.description.en}</Text>
+          <Text style={[styles.description, compact && styles.descriptionCompact]}>{step.description.en}</Text>
 
-          {qualities.length > 0 && (
+          {!compact && qualities.length > 0 && (
             <View style={styles.qualities}>
               <SproutIcon color={accent} />
               {qualities.map((q, i) => (
@@ -128,23 +121,8 @@ function StepPage({
             </View>
           )}
 
-          {/* Start: a quiet inline row; the countdown replaces the word once running */}
-          <TouchableOpacity
-            style={styles.startRow}
-            onPress={onStartPress}
-            activeOpacity={0.6}
-            accessibilityLabel={!started ? 'Start timer' : running ? 'Pause timer' : 'Resume timer'}
-          >
-            <View style={styles.startLine} />
-            <View style={styles.startCenter}>
-              <ClockIcon color={accent} />
-              <Text style={[styles.startText, { color: accent }]}>{startLabel}</Text>
-            </View>
-            <View style={styles.startLine} />
-          </TouchableOpacity>
-          <Text style={styles.caption}>{caption}</Text>
-
-          {/* Very thin progress line */}
+          {/* Countdown: shows the suggested time until started */}
+          <Text style={[styles.timerText, { color: accent }]}>{done ? 'Done' : formatTime(remaining)}</Text>
           <View style={styles.track}>
             <Animated.View
               style={[
@@ -157,10 +135,33 @@ function StepPage({
             />
           </View>
         </View>
-      </ScrollView>
+      </View>
 
-      {/* Back / Next sit below the card */}
-      <View style={[styles.navWrap, { paddingBottom: insets.bottom + spacing.sm }]}>{nav}</View>
+      {/* Bottom bar: Back · main button · Skip */}
+      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.sm }]}>
+        <View style={styles.sideSlot}>
+          {onBack && (
+            <TouchableOpacity onPress={onBack} hitSlop={8}>
+              <Text style={styles.sideText}>Back</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <TouchableOpacity
+          style={[styles.mainButton, { backgroundColor: accent }]}
+          onPress={onButtonPress}
+          activeOpacity={0.85}
+          accessibilityLabel={buttonLabel}
+        >
+          <Text style={styles.mainButtonText}>{buttonLabel}</Text>
+        </TouchableOpacity>
+        <View style={[styles.sideSlot, styles.sideSlotRight]}>
+          {!done && (
+            <TouchableOpacity onPress={onNext} hitSlop={8} accessibilityLabel={isLast ? 'Finish early' : 'Skip to next'}>
+              <Text style={styles.sideText}>Skip</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
     </View>
   );
 }
@@ -197,25 +198,6 @@ export default function PracticeScreen() {
   const isFirst = index === 0;
   const isLast = index === steps.length - 1;
 
-  const nav = (
-    <View style={styles.nav}>
-      {isFirst ? (
-        <View style={styles.navSpacer} />
-      ) : (
-        <TouchableOpacity style={styles.backButton} onPress={() => setIndex(i => i - 1)}>
-          <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
-      )}
-      <TouchableOpacity
-        style={[styles.nextButton, { backgroundColor: accent }]}
-        onPress={() => (isLast ? router.push('/closing-reflection') : setIndex(i => i + 1))}
-      >
-        <Text style={styles.buttonText}>{isLast ? 'Finish' : 'Next'}</Text>
-      </TouchableOpacity>
-      <View style={styles.navSpacer} />
-    </View>
-  );
-
   return (
     <StepPage
       key={current.step.key}
@@ -224,7 +206,9 @@ export default function PracticeScreen() {
       chakra={chakra}
       accent={accent}
       label={`${session.name.en} · ${current.section} · ${index + 1} of ${steps.length}`}
-      nav={nav}
+      isLast={isLast}
+      onBack={isFirst ? undefined : () => setIndex(i => i - 1)}
+      onNext={() => (isLast ? router.push('/closing-reflection') : setIndex(i => i + 1))}
       onExit={() =>
         Alert.alert('End practice?', 'You will go back to the beginning.', [
           { text: 'Keep going', style: 'cancel' },
@@ -250,7 +234,7 @@ const styles = StyleSheet.create({
   },
   headerSide: {
     width: 40,
-    height: 40,
+    height: 36,
     justifyContent: 'center',
   },
   exitText: {
@@ -266,20 +250,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // ── Card ──────────────────────────────────────────────────────────────────
-  scroll: {
+  // ── Card (fills the space between header and bottom bar) ───────────────────
+  cardWrap: {
+    flex: 1,
     paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
-    paddingBottom: spacing.md,
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.sm,
   },
   card: {
+    flex: 1,
     alignSelf: 'center',
     width: '100%',
     maxWidth: 480,
     alignItems: 'center',
     backgroundColor: poseColors.card,
     borderRadius: 24,
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     shadowColor: '#2D2B6B',
     shadowOffset: { width: 0, height: 8 },
@@ -287,17 +273,26 @@ const styles = StyleSheet.create({
     shadowRadius: 24,
     elevation: 3,
   },
+  cardCompact: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
 
   // Chakra header
   symbol: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  symbolCompact: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
   symbolText: {
-    fontSize: 14,
+    fontSize: 13,
     letterSpacing: 1.5,
     color: '#FFFFFF',
   },
@@ -305,31 +300,37 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     fontSize: 12,
     letterSpacing: 3.5,
-    marginTop: spacing.sm + 2,
+    marginTop: spacing.sm,
   },
   chakraEnglish: {
     fontSize: 13,
     color: poseColors.gray,
-    marginTop: 2,
+    marginTop: 1,
   },
   poseName: {
     fontFamily: fonts.heading,
-    fontSize: 30,
+    fontSize: 28,
     color: poseColors.title,
     textAlign: 'center',
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
+  },
+  poseNameCompact: {
+    fontSize: 24,
+    marginTop: spacing.xs,
   },
   poseSanskrit: {
     fontFamily: fonts.headingItalic,
-    fontSize: 18,
+    fontSize: 17,
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 1,
   },
 
   // Illustration
   imageBox: {
+    flex: 1,
     alignSelf: 'stretch',
-    marginTop: spacing.sm,
+    minHeight: 60,
+    marginTop: spacing.xs,
   },
   image: {
     flex: 1,
@@ -340,14 +341,17 @@ const styles = StyleSheet.create({
     width: '85%',
     height: 1,
     backgroundColor: poseColors.hairline,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
+    marginVertical: spacing.sm,
   },
   description: {
-    fontSize: fontSize.body,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
     color: '#4A4A4A',
     textAlign: 'center',
+  },
+  descriptionCompact: {
+    fontSize: 14,
+    lineHeight: 20,
   },
 
   // Qualities
@@ -356,7 +360,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
     gap: spacing.sm,
   },
   qualityItem: {
@@ -374,34 +378,12 @@ const styles = StyleSheet.create({
     color: poseColors.gray,
   },
 
-  // Start row
-  startRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'stretch',
-    marginTop: spacing.lg,
-  },
-  startLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: poseColors.hairline,
-  },
-  startCenter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  startText: {
-    fontSize: 17,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  caption: {
-    fontSize: fontSize.small,
-    color: poseColors.gray,
-    marginTop: spacing.xs,
-    height: 16,
+  // Countdown
+  timerText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 34,
+    letterSpacing: 1,
+    marginTop: spacing.sm,
   },
   track: {
     alignSelf: 'stretch',
@@ -414,27 +396,7 @@ const styles = StyleSheet.create({
     height: 2,
   },
 
-  // Icons
-  clock: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1.5,
-  },
-  clockHandUp: {
-    position: 'absolute',
-    left: 7,
-    top: 3,
-    width: 1.5,
-    height: 6,
-  },
-  clockHandSide: {
-    position: 'absolute',
-    left: 7,
-    top: 8,
-    width: 5,
-    height: 1.5,
-  },
+  // Sprout icon
   sprout: {
     width: 20,
     height: 20,
@@ -464,32 +426,37 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '30deg' }],
   },
 
-  // ── Navigation (below the card) ────────────────────────────────────────────
-  navWrap: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  nav: {
+  // ── Bottom bar ─────────────────────────────────────────────────────────────
+  bottomBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xs,
   },
-  navSpacer: {
-    width: 80,
+  sideSlot: {
+    width: 56,
+    alignItems: 'flex-start',
   },
-  backButton: {
-    width: 80,
-    paddingVertical: spacing.md,
+  sideSlotRight: {
+    alignItems: 'flex-end',
   },
-  backText: {
+  sideText: {
     fontSize: fontSize.body,
     color: poseColors.gray,
     fontWeight: '600',
   },
-  nextButton: {
-    paddingVertical: 15,
-    paddingHorizontal: 52,
+  mainButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 16,
     borderRadius: 28,
+    marginHorizontal: spacing.sm,
+  },
+  mainButtonText: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
 
   // ── Placeholder (chakras without sessions yet) ─────────────────────────────
