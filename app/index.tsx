@@ -2,46 +2,43 @@ import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Text } from '../components/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { fonts, poseColors, welcomeColors, spacing, fontSize } from '../theme/tokens';
+import { fonts, neutralColors, spacing, fontSize } from '../theme/tokens';
 
-// Artwork already blended onto the card colour, so it melts into the card
-const cardImage = require('../assets/welcome-card.jpg');
+// Text-free watercolour illustration; everything written on the screen is real UI on top of it
+const artwork = require('../assets/welcome-art.jpg');
 
-// Welcome: the same centered-card look as the pose screens. The artwork fills
-// the card, the title and tagline sit below it, and Begin sits under the card.
+// Welcome: the illustration fills the screen. Heading and divider sit near the top,
+// the subtitle and Begin near the bottom, all inside the safe areas.
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + spacing.md }]}>
-      <View style={styles.cardWrap}>
-        <View style={styles.card}>
-          <View style={styles.imageBox}>
-            <Image source={cardImage} style={styles.image} resizeMode="contain" />
-          </View>
+    <View style={styles.screen}>
+      <Image source={artwork} style={styles.artwork} resizeMode="cover" accessible={false} />
 
-          <Text style={styles.title}>PraNadi</Text>
-
-          {/* Decorative divider */}
-          <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerDiamond}>◆</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          <Text style={styles.tagline}>
-            A space to reconnect with the language of your energy.
-          </Text>
+      {/* ── Top: heading + divider ── */}
+      <View style={[styles.top, { paddingTop: insets.top + spacing.lg }]}>
+        <Text style={styles.title} accessibilityRole="header">PraNadi</Text>
+        <View style={styles.dividerRow}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerDiamond}>◆</Text>
+          <View style={styles.dividerLine} />
         </View>
       </View>
 
-      {/* Begin sits below the card */}
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.md }]}>
+      <View style={styles.spacer} />
+
+      {/* ── Bottom: subtitle + Begin ── */}
+      <View style={[styles.bottom, { paddingBottom: insets.bottom + spacing.md }]}>
+        <Text style={styles.subtitle}>
+          A space to reconnect with the language of your energy.
+        </Text>
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.push('/intro')}
           activeOpacity={0.85}
+          accessibilityRole="button"
           accessibilityLabel="Begin"
         >
           <Text style={styles.buttonText}>Begin</Text>
@@ -55,85 +52,71 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: poseColors.page,
+    backgroundColor: neutralColors.background,
+  },
+  artwork: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
   },
 
-  // ── Card ──────────────────────────────────────────────────────────────────
-  cardWrap: {
-    flex: 1,
-    paddingHorizontal: spacing.md,
-  },
-  card: {
-    flex: 1,
-    alignSelf: 'center',
-    width: '100%',
-    maxWidth: 480,
+  // ── Top ───────────────────────────────────────────────────────────────────
+  top: {
     alignItems: 'center',
-    backgroundColor: poseColors.card,
-    borderRadius: 24,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    shadowColor: '#2D2B6B',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.07,
-    shadowRadius: 24,
-    elevation: 3,
+    paddingHorizontal: spacing.xl,
   },
-  imageBox: {
-    flex: 1,
-    alignSelf: 'stretch',
-    minHeight: 120,
-  },
-  image: {
-    flex: 1,
-    width: '100%',
-  },
-
-  // ── Title block ────────────────────────────────────────────────────────────
   title: {
     fontFamily: fonts.heading,
     fontSize: 40,
     letterSpacing: 2,
-    color: poseColors.title,
-    marginTop: spacing.sm,
+    color: neutralColors.textPrimary,
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '60%',
-    marginVertical: spacing.sm + 2,
+    width: '46%',
+    marginTop: spacing.sm,
   },
   dividerLine: {
     flex: 1,
-    height: 1,
-    backgroundColor: poseColors.hairline,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: neutralColors.textPrimary,
+    opacity: 0.4,
   },
   dividerDiamond: {
     fontSize: 8,
-    color: welcomeColors.deepIndigo,
+    color: neutralColors.textPrimary,
     opacity: 0.6,
     marginHorizontal: spacing.sm,
   },
-  tagline: {
-    fontSize: fontSize.body,
-    color: poseColors.gray,
-    textAlign: 'center',
-    lineHeight: 24,
-    maxWidth: 280,
+
+  spacer: {
+    flex: 1,
   },
 
-  // ── Begin ──────────────────────────────────────────────────────────────────
-  bottomBar: {
+  // ── Bottom ────────────────────────────────────────────────────────────────
+  bottom: {
     alignItems: 'center',
-    paddingTop: spacing.md,
+    paddingHorizontal: spacing.xl,
+  },
+  subtitle: {
+    fontSize: fontSize.body,
+    lineHeight: 24,
+    color: neutralColors.textSecondary,
+    textAlign: 'center',
+    maxWidth: 290,
+    marginBottom: spacing.lg,
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: welcomeColors.deepIndigo,
+    backgroundColor: neutralColors.textPrimary,
     paddingVertical: 16,
-    paddingHorizontal: 52,
+    paddingHorizontal: 56,
     borderRadius: 28,
     gap: spacing.sm,
   },
