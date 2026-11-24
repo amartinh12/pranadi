@@ -23,11 +23,11 @@ const SYMBOLS: Record<string, { src: number; fill: number }> = {
   thirdEye:    { src: require('../assets/symbol-third-eye.png'),    fill: 1 }, // cropped to the lotus
 };
 const LOTUS_CX = 470;  // where the painted Root lotus sits on the page, in artwork pixels
-const LOTUS_CY = 243;
+const LOTUS_CY = 303;
 const LOTUS_D = 270;   // its width
 const ART_W = 941;
 const ART_H = 2072;
-const LOTUS_BOTTOM = 385; // bottom of the painted lotus's glow, in artwork pixels
+const LOTUS_BOTTOM = 445; // bottom of the painted lotus's glow, in artwork pixels
 const HILLS_TOP = 1815; // where the painted hills begin, in artwork pixels
 const PAPER = '#FDEDDC';
 const CARD = '#FEFCFA';
