@@ -11,14 +11,15 @@ import { chakras } from '../content/chakras';
 // selection and Continue as real UI on top. The painted cards, illustrations and circles
 // are part of the artwork; the touch areas and selection marks are placed from its own
 // geometry (artwork pixels below), so they stay aligned at any screen size.
-// One page per chakra, all with the same geometry. Throat and Third Eye have no artwork
-// yet and use the Root page.
+// One page per chakra, all with the same geometry. Third Eye has no artwork yet and uses
+// the Root page.
 const rootArtwork = require('../assets/rhythm-art.jpg');
 const ARTWORK: Record<string, number> = {
   root: rootArtwork,
   sacral: require('../assets/rhythm-art-sacral.jpg'),
   solarPlexus: require('../assets/rhythm-art-solar-plexus.jpg'),
   heart: require('../assets/rhythm-art-heart.jpg'),
+  throat: require('../assets/rhythm-art-throat.jpg'),
   crown: require('../assets/rhythm-art-crown.jpg'),
 };
 const ART_W = 941;

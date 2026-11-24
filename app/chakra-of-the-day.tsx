@@ -14,13 +14,13 @@ const rootArtwork = require('../assets/chakra-intro-root.jpg'); // same page wit
 
 // Painted symbols for the other chakras (transparent cut-outs). `fill` is how much of each
 // image the lotus itself covers, so every lotus is drawn at the same visual size.
-// Third Eye has no artwork yet.
 const SYMBOLS: Record<string, { src: number; fill: number }> = {
   sacral:      { src: require('../assets/symbol-sacral.png'),       fill: 0.83 },
   solarPlexus: { src: require('../assets/symbol-solar-plexus.png'), fill: 0.87 },
   heart:       { src: require('../assets/symbol-heart.png'),        fill: 0.89 },
   throat:      { src: require('../assets/symbol-throat.png'),       fill: 0.9 },
   crown:       { src: require('../assets/symbol-crown.png'),        fill: 0.915 },
+  thirdEye:    { src: require('../assets/symbol-third-eye.png'),    fill: 1 }, // cropped to the lotus
 };
 const LOTUS_CX = 470;  // where the painted Root lotus sits on the page, in artwork pixels
 const LOTUS_CY = 243;
