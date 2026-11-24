@@ -11,7 +11,16 @@ import { chakras } from '../content/chakras';
 // selection and Continue as real UI on top. The painted cards, illustrations and circles
 // are part of the artwork; the touch areas and selection marks are placed from its own
 // geometry (artwork pixels below), so they stay aligned at any screen size.
-const artwork = require('../assets/rhythm-art.jpg');
+// One page per chakra, all with the same geometry. Throat and Third Eye have no artwork
+// yet and use the Root page.
+const rootArtwork = require('../assets/rhythm-art.jpg');
+const ARTWORK: Record<string, number> = {
+  root: rootArtwork,
+  sacral: require('../assets/rhythm-art-sacral.jpg'),
+  solarPlexus: require('../assets/rhythm-art-solar-plexus.jpg'),
+  heart: require('../assets/rhythm-art-heart.jpg'),
+  crown: require('../assets/rhythm-art-crown.jpg'),
+};
 const ART_W = 941;
 const ART_H = 2072;
 const HILLS_TOP = 1845;
@@ -78,7 +87,7 @@ export default function IntensityScreen() {
   return (
     <View style={styles.screen}>
       <Image
-        source={artwork}
+        source={ARTWORK[chakra?.colorToken ?? 'root'] ?? rootArtwork}
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
         accessible={false}
       />
