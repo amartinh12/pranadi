@@ -6,13 +6,12 @@ import { Text } from '../components/Text';
 import { StartOver } from '../components/StartOver';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { chakraColors, fonts, neutralColors, welcomeColors } from '../theme/tokens';
-import { chakras } from '../content/chakras';
+import { fonts, neutralColors } from '../theme/tokens';
 import { QUESTIONS, scoreQuiz } from './quizData';
 
 const OPTION_LABELS = ['Not at all', 'Somewhat', 'Mostly', 'Fully'] as const;
 
-// One watercolour background for all 14 questions (and the result), mounted once and
+// One watercolour background for all 14 questions , mounted once and
 // never reloaded between questions. It is the supplied artwork with plain paper added in
 // the middle so it fills tall phones without stretching; everything written on the screen
 // is real UI placed from the artwork's own geometry (measured in its pixels below).
@@ -34,7 +33,6 @@ export default function QuizScreen() {
   const [answers, setAnswers] = useState<(number | null)[]>(
     Array(QUESTIONS.length).fill(null),
   );
-  const [phase, setPhase] = useState<'quiz' | 'reveal'>('quiz');
 
   // ── Reduced motion: skip the text fade when the person has asked for less motion ──
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -75,7 +73,8 @@ export default function QuizScreen() {
     if (!isLast) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      setPhase('reveal');
+      // Last question: go straight to the chosen chakra's page
+      router.push(`/chakra-of-the-day?chakraId=${scoreQuiz(answers)}` as never);
     }
   }
 
@@ -97,123 +96,95 @@ export default function QuizScreen() {
     Animated.timing(progressAnim, { toValue: progress, duration: 220, easing: Easing.out(Easing.quad), useNativeDriver: false }).start();
   }, [currentIndex, reduceMotion, fade, progressAnim, progress]);
 
-  // ── Result (shown after the last question; the chakra colour appears only here) ──
+  // ── Question screen ──
   let content: React.ReactNode;
   let bottomButton: React.ReactNode;
 
-  if (phase === 'reveal') {
-    const chakraId = scoreQuiz(answers);
-    const chakra   = chakras.find(c => c.id === chakraId);
-    const accent   = chakra ? chakraColors[chakra.colorToken] : welcomeColors.deepIndigo;
-    const name     = chakra?.displayName.en ?? 'Your chakra';
-
-    content = (
-      <View style={styles.revealWrap}>
-        <View style={[styles.revealOrb, { backgroundColor: accent }]} />
-        <Text style={[styles.revealHeading, { fontSize: questionSize, lineHeight: questionSize * 1.3 }]}>
-          Your {name} is asking{'\n'}for care today.
-        </Text>
-        <Text style={styles.revealSub}>That's where we suggest beginning.</Text>
-      </View>
-    );
-    bottomButton = (
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push(`/chakra-of-the-day?chakraId=${chakraId}` as never)}
-        activeOpacity={0.85}
-        accessibilityRole="button"
-        accessibilityLabel="Begin"
-      >
-        <Text style={styles.buttonText}>Begin</Text>
-        <Text style={styles.buttonArrow}>→</Text>
-      </TouchableOpacity>
-    );
-  } else {
-    content = (
-      <>
-        {/* ── Header: name, count, progress ── */}
-        <View style={styles.header}>
-          <View style={styles.headerRow}>
-            <View style={styles.backSlot}>
-              {currentIndex > 0 && (
-                <TouchableOpacity
-                  onPress={handleBack}
-                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-                  accessibilityRole="button"
-                  accessibilityLabel="Previous question"
-                >
-                  <Text style={styles.backText}>←</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <Text style={styles.title} accessibilityRole="header">CHECK IN WITH YOURSELF</Text>
-            <View style={styles.backSlot} />
+  content = (
+    <>
+      {/* ── Header: name, count, progress ── */}
+      <View style={styles.header}>
+        <View style={styles.headerRow}>
+          <View style={styles.backSlot}>
+            {currentIndex > 0 && (
+              <TouchableOpacity
+                onPress={handleBack}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                accessibilityRole="button"
+                accessibilityLabel="Previous question"
+              >
+                <Text style={styles.backText}>←</Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Text style={styles.count}>
-            {currentIndex + 1} of {QUESTIONS.length}
-          </Text>
-          <View
-            style={styles.progressTrack}
-            accessible
-            accessibilityRole="progressbar"
-            accessibilityValue={{ min: 0, max: QUESTIONS.length, now: currentIndex + 1 }}
-          >
-            <Animated.View
-              style={[
-                styles.progressFill,
-                { width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) },
-              ]}
-            />
-          </View>
+          <Text style={styles.title} accessibilityRole="header">CHECK IN WITH YOURSELF</Text>
+          <View style={styles.backSlot} />
         </View>
+        <Text style={styles.count}>
+          {currentIndex + 1} of {QUESTIONS.length}
+        </Text>
+        <View
+          style={styles.progressTrack}
+          accessible
+          accessibilityRole="progressbar"
+          accessibilityValue={{ min: 0, max: QUESTIONS.length, now: currentIndex + 1 }}
+        >
+          <Animated.View
+            style={[
+              styles.progressFill,
+              { width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) },
+            ]}
+          />
+        </View>
+      </View>
 
-        {/* ── Question + answers (one reusable block; only the text changes) ── */}
-        <Animated.View style={{ opacity: fade }}>
-          <Text style={[styles.questionText, { fontSize: questionSize, lineHeight: questionSize * 1.3 }]}>
-            {question.text}
-          </Text>
+      {/* ── Question + answers (one reusable block; only the text changes) ── */}
+      <Animated.View style={{ opacity: fade }}>
+        <Text style={[styles.questionText, { fontSize: questionSize, lineHeight: questionSize * 1.3 }]}>
+          {question.text}
+        </Text>
 
-          <View style={styles.options}>
-            {OPTION_LABELS.map((label, idx) => {
-              const selected = currentAnswer === idx;
-              return (
-                <TouchableOpacity
-                  key={idx}
-                  style={[styles.option, selected && styles.optionSelected]}
-                  onPress={() => handleSelect(idx)}
-                  activeOpacity={0.8}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={label}
-                >
-                  <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{label}</Text>
-                  {selected && <Text style={styles.check}>✓</Text>}
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </Animated.View>
-      </>
-    );
-    bottomButton = (
-      <TouchableOpacity
-        style={[styles.button, currentAnswer === null && styles.buttonDisabled]}
-        onPress={handleContinue}
-        activeOpacity={currentAnswer === null ? 1 : 0.85}
-        disabled={currentAnswer === null}
-        accessibilityRole="button"
-        accessibilityLabel={isLast ? 'See my result' : 'Continue'}
-        accessibilityState={{ disabled: currentAnswer === null }}
-      >
-        <Text style={styles.buttonText}>{isLast ? 'See my result' : 'Continue'}</Text>
-        <Text style={styles.buttonArrow}>→</Text>
-      </TouchableOpacity>
-    );
-  }
+        <View style={styles.options}>
+          {OPTION_LABELS.map((label, idx) => {
+            const selected = currentAnswer === idx;
+            return (
+              <TouchableOpacity
+                key={idx}
+                style={[styles.option, selected && styles.optionSelected]}
+                onPress={() => handleSelect(idx)}
+                activeOpacity={0.8}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                accessibilityLabel={label}
+              >
+                <Text style={[styles.optionText, selected && styles.optionTextSelected]}>{label}</Text>
+                {selected && <Text style={styles.check}>✓</Text>}
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Animated.View>
+    </>
+  );
+  bottomButton = (
+    <TouchableOpacity
+      style={[styles.button, currentAnswer === null && styles.buttonDisabled]}
+      onPress={handleContinue}
+      activeOpacity={currentAnswer === null ? 1 : 0.85}
+      disabled={currentAnswer === null}
+      accessibilityRole="button"
+      accessibilityLabel={isLast ? 'See my result' : 'Continue'}
+      accessibilityState={{ disabled: currentAnswer === null }}
+    >
+      <Text style={styles.buttonText}>{isLast ? 'See my result' : 'Continue'}</Text>
+      <Text style={styles.buttonArrow}>→</Text>
+    </TouchableOpacity>
+  );
+
 
   return (
     <View style={styles.screen}>
-      {/* The one background: stays mounted across all questions and the result */}
+      {/* The one background: stays mounted across all the questions */}
       <Image
         source={artwork}
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
@@ -373,30 +344,5 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 17,
     fontWeight: '400',
-  },
-
-  // ── Result ────────────────────────────────────────────────────────────────
-  revealWrap: {
-    alignItems: 'center',
-    paddingTop: 40,
-  },
-  revealOrb: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginBottom: 32,
-    opacity: 0.85,
-  },
-  revealHeading: {
-    fontFamily: fonts.heading,
-    color: neutralColors.textPrimary,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  revealSub: {
-    fontSize: 16,
-    lineHeight: 26,
-    color: neutralColors.textSecondary,
-    textAlign: 'center',
   },
 });
