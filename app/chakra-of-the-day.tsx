@@ -11,6 +11,20 @@ import { chakras } from '../content/chakras';
 // Continue button take the chosen chakra's colour. Everything written is real UI.
 const artwork = require('../assets/chakra-intro.jpg');
 const rootArtwork = require('../assets/chakra-intro-root.jpg'); // same page with the painted Root lotus
+
+// Painted symbols for the other chakras (transparent cut-outs). `fill` is how much of each
+// image the lotus itself covers, so every lotus is drawn at the same visual size.
+// Third Eye has no artwork yet.
+const SYMBOLS: Record<string, { src: number; fill: number }> = {
+  sacral:      { src: require('../assets/symbol-sacral.png'),       fill: 0.83 },
+  solarPlexus: { src: require('../assets/symbol-solar-plexus.png'), fill: 0.87 },
+  heart:       { src: require('../assets/symbol-heart.png'),        fill: 0.89 },
+  throat:      { src: require('../assets/symbol-throat.png'),       fill: 0.9 },
+  crown:       { src: require('../assets/symbol-crown.png'),        fill: 0.915 },
+};
+const LOTUS_CX = 470;  // where the painted Root lotus sits on the page, in artwork pixels
+const LOTUS_CY = 243;
+const LOTUS_D = 270;   // its width
 const ART_W = 941;
 const ART_H = 2072;
 const LOTUS_BOTTOM = 385; // bottom of the painted lotus's glow, in artwork pixels
@@ -51,9 +65,11 @@ export default function ChakraOfTheDayScreen() {
 
   const BUTTON_H = 56;
   const footerBottom = Math.max(insets.bottom + 12, height - hillsY + 4);
-  // Room for the painted lotus at the top of the page (Root only for now)
+  // Room for the painted lotus at the top of the page
   const isRoot = chakra.id === 'root';
-  const lotusSpace = isRoot ? Math.max(0, top0 + LOTUS_BOTTOM * scale - (insets.top + 14)) : 0;
+  const symbol = SYMBOLS[chakra.colorToken];
+  const lotusBox = symbol ? LOTUS_D / symbol.fill : 0;
+  const lotusSpace = isRoot || symbol ? Math.max(0, top0 + LOTUS_BOTTOM * scale - (insets.top + 14)) : 0;
   const titleSize = Math.min(Math.max(width * 0.092, 32), 38);
 
   return (
@@ -63,6 +79,21 @@ export default function ChakraOfTheDayScreen() {
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
         accessible={false}
       />
+
+      {symbol && (
+        <Image
+          source={symbol.src}
+          style={{
+            position: 'absolute',
+            left: left0 + (LOTUS_CX - lotusBox / 2) * scale,
+            top: top0 + (LOTUS_CY - lotusBox / 2) * scale,
+            width: lotusBox * scale,
+            height: lotusBox * scale,
+          }}
+          resizeMode="contain"
+          accessible={false}
+        />
+      )}
 
       <ScrollView
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: footerBottom + BUTTON_H + 10 }}
