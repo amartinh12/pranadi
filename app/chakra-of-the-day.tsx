@@ -21,6 +21,19 @@ const SYMBOLS: Record<string, { src: number; fill: number }> = {
   crown:       { src: require('../assets/symbol-crown.png'),        fill: 0.915 },
   thirdEye:    { src: require('../assets/symbol-third-eye.png'),    fill: 1 }, // cropped to the lotus
 };
+// The page's painted hills recoloured in each chakra's colour: a strip laid over the bottom
+// of the shared background, starting where the hills begin.
+const HILLS_Y = 1790;
+const HILLS_H = 282;
+const HILLS: Record<string, number> = {
+  root:        require('../assets/hills-root.jpg'),
+  sacral:      require('../assets/hills-sacral.jpg'),
+  solarPlexus: require('../assets/hills-solar-plexus.jpg'),
+  heart:       require('../assets/hills-heart.jpg'),
+  throat:      require('../assets/hills-throat.jpg'),
+  thirdEye:    require('../assets/hills-third-eye.jpg'),
+  crown:       require('../assets/hills-crown.jpg'),
+};
 const LOTUS_CX = 470;  // where the symbol sits on the page, in artwork pixels
 const LOTUS_CY = 303;
 const LOTUS_D = 270;   // its width
@@ -77,6 +90,20 @@ export default function ChakraOfTheDayScreen() {
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
         accessible={false}
       />
+
+      {HILLS[chakra.colorToken] && (
+        <Image
+          source={HILLS[chakra.colorToken]}
+          style={{
+            position: 'absolute',
+            left: left0,
+            top: top0 + HILLS_Y * scale,
+            width: ART_W * scale,
+            height: HILLS_H * scale,
+          }}
+          accessible={false}
+        />
+      )}
 
       {symbol && (
         <Image
