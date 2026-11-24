@@ -22,8 +22,6 @@ The look is an illustrated yoga journal: warm ivory paper, soft watercolour artw
 5. **How much time feels right today?** – Pause (5 min), Flow (20 min) or Journey (45 min).
 6. **Practice** – one pose per page with its illustration, a description, a suggested time and a countdown. Back, Pause/Resume, Next and Skip are always within reach, and an exit button returns to the start.
 
-A **Start over** control is available on every screen after the welcome.
-
 ## Content status
 
 | Chakra | Introduction | Practice sessions |
@@ -69,7 +67,7 @@ app/            Screens (expo-router: one file per screen)
   intensity.tsx       Practice duration
   practice.tsx        Guided practice and timer
   closing-reflection.tsx  Placeholder
-components/     Shared pieces (Text, StartOver)
+components/     Shared pieces (Text)
 content/        Chakra content, practice sessions, pose image map
 theme/          Colours, fonts and spacing tokens
 assets/         Watercolour backgrounds and pose illustrations

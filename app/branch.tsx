@@ -1,6 +1,5 @@
 import { Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Text } from '../components/Text';
-import { StartOver } from '../components/StartOver';
 import { useRouter } from 'expo-router';
 import { fonts, neutralColors } from '../theme/tokens';
 
@@ -113,7 +112,6 @@ export default function BranchScreen() {
         </Pressable>
       ))}
 
-      <StartOver plain />
     </View>
   );
 }

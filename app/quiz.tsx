@@ -3,7 +3,6 @@ import {
   AccessibilityInfo, Animated, Easing, Image, ScrollView, StyleSheet, TouchableOpacity, View, useWindowDimensions,
 } from 'react-native';
 import { Text } from '../components/Text';
-import { StartOver } from '../components/StartOver';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { fonts, neutralColors } from '../theme/tokens';
@@ -203,7 +202,6 @@ export default function QuizScreen() {
 
       <View style={[styles.bottom, { bottom: buttonBottom }]}>{bottomButton}</View>
 
-      <StartOver plain />
     </View>
   );
 }
