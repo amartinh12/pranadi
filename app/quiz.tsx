@@ -18,7 +18,7 @@ const OPTION_LABELS = ['Not at all', 'Somewhat', 'Mostly', 'Fully'] as const;
 const artwork = require('../assets/questions-bg.jpg');
 const ART_W = 941;
 const ART_H = 2072;
-const LOTUS_BOTTOM = 230;  // the small gold lotus ends here
+const LOTUS_BOTTOM = 185;  // the questions start below this (the artwork is plain paper above it)
 const HILLS_TOP = 1815;    // the watercolour hills begin here
 const PAPER = '#FDEEDE';   // the artwork's paper colour (shows only beside the art on short screens)
 
