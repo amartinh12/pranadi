@@ -10,11 +10,11 @@ import { chakras } from '../content/chakras';
 // cards) is shared by all seven chakras; the divider, affirmation accent and
 // Continue button take the chosen chakra's colour. Everything written is real UI.
 const artwork = require('../assets/chakra-intro.jpg');
-const rootArtwork = require('../assets/chakra-intro-root.jpg'); // same page with the painted Root lotus
 
-// Painted symbols for the other chakras (transparent cut-outs). `fill` is how much of each
+// Painted symbols (transparent cut-outs). `fill` is how much of each
 // image the lotus itself covers, so every lotus is drawn at the same visual size.
 const SYMBOLS: Record<string, { src: number; fill: number }> = {
+  root:        { src: require('../assets/root-symbol.png'),         fill: 0.946 },
   sacral:      { src: require('../assets/symbol-sacral.png'),       fill: 0.83 },
   solarPlexus: { src: require('../assets/symbol-solar-plexus.png'), fill: 0.87 },
   heart:       { src: require('../assets/symbol-heart.png'),        fill: 0.89 },
@@ -22,12 +22,12 @@ const SYMBOLS: Record<string, { src: number; fill: number }> = {
   crown:       { src: require('../assets/symbol-crown.png'),        fill: 0.915 },
   thirdEye:    { src: require('../assets/symbol-third-eye.png'),    fill: 1 }, // cropped to the lotus
 };
-const LOTUS_CX = 470;  // where the painted Root lotus sits on the page, in artwork pixels
+const LOTUS_CX = 470;  // where the symbol sits on the page, in artwork pixels
 const LOTUS_CY = 303;
 const LOTUS_D = 270;   // its width
 const ART_W = 941;
 const ART_H = 2072;
-const LOTUS_BOTTOM = 445; // bottom of the painted lotus's glow, in artwork pixels
+const LOTUS_BOTTOM = 445; // bottom of the symbol area, in artwork pixels
 const HILLS_TOP = 1815; // where the painted hills begin, in artwork pixels
 const PAPER = '#FDEDDC';
 const CARD = '#FEFCFA';
@@ -66,16 +66,15 @@ export default function ChakraOfTheDayScreen() {
   const BUTTON_H = 56;
   const footerBottom = Math.max(insets.bottom + 12, height - hillsY + 4);
   // Room for the painted lotus at the top of the page
-  const isRoot = chakra.id === 'root';
   const symbol = SYMBOLS[chakra.colorToken];
   const lotusBox = symbol ? LOTUS_D / symbol.fill : 0;
-  const lotusSpace = isRoot || symbol ? Math.max(0, top0 + LOTUS_BOTTOM * scale - (insets.top + 14)) : 0;
+  const lotusSpace = symbol ? Math.max(0, top0 + LOTUS_BOTTOM * scale - (insets.top + 14)) : 0;
   const titleSize = Math.min(Math.max(width * 0.092, 32), 38);
 
   return (
     <View style={styles.screen}>
       <Image
-        source={isRoot ? rootArtwork : artwork}
+        source={artwork}
         style={{ position: 'absolute', left: left0, top: top0, width: ART_W * scale, height: ART_H * scale }}
         accessible={false}
       />
